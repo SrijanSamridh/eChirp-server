@@ -27,9 +27,9 @@
 > Fostered teamwork to integrate diverse features seamlessly.
 ## Technologies Used
 ```
-> - NodeJS
-> - MongoDB
-> - [Additional technologies used in the project]
+NodeJS
+MongoDB
+[Additional technologies used in the project]
 ```
 
 ## Getting Started
