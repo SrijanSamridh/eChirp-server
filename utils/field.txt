@@ -1,0 +1,158 @@
+Business loan:-
+
+businessName,
+entityType,
+mobile,
+otp,
+email,
+panNumber,
+loanAmount,
+tenure,
+natureOfBusiness,
+dateOfIncorporation,
+businessPremisesOwnership,
+annualTurnover,
+pincode,
+city,
+state,
+firstName,
+lastName,
+dateOfBirth,
+gender,
+residenceOwnerhipStatus
+
+
+
+Professional Loan ("applicant type:- individual") :-
+
+selectProfession,
+firstName,
+lastName,
+mobile,
+opt,
+email,
+panNumber,
+loanAmount,
+tenure,
+dateOfBirth,
+residenceOwnerhipStatus,
+gender,
+pincode,
+city,
+state,
+entityType,
+businessPremisesOwnership,
+annualReceipt,
+parcticingScine,
+membershipNumber,
+
+
+Professional Loan ("applicant type:- non-individual") :-
+
+selectProfession,
+companyName,------------>
+constitution,------------>
+mobile,------------>
+opt,------------>
+email,------------>
+panNumber,------------>
+loanAmount,------------>
+tenure,------------>
+dateOfIncorporation,
+businessPremisesOwnership,
+annualReceipt,
+pincode,
+city,
+state,
+firstName,------------>
+lastName,------------>
+dateOfBirth,
+gender,
+residenceOwnerhipStatus,
+membershipNumberm
+
+Home loan:-
+
+firstName,
+lastName,
+city,
+mobile,
+email,
+dateOfBirth,
+
+
+personal loan:-
+
+firstName,
+lastName,
+mobile,
+otp,
+email,
+panNumber,
+loanAmount,
+tenure,
+qualification,
+dateOfBirth,
+gender,
+address,
+residenceStatus,
+pincode,
+city,
+state,
+employerName,
+otherEmployerName,
+totalExperience,
+netMonthlySalary
+
+
+
+// individual:-
+        qualification:"",
+        dateOfBirth:"",
+        gender:"",
+        residenceOwnershipStatus:"",
+        residentialPincode: "",
+        employmentType: "",
+
+            // ------ Salaried --------
+
+            employmentType: "",
+            totalExperience:"",
+            netMonthlySalary:"",
+
+            // ------ Self Employed --------
+
+            businessType: "",
+            businessVintage: "",
+
+
+        //________ non-individual________:-
+
+        applicantType: "",
+        firmName: "",
+        constitution: "",
+        dateOfIncorporation: "",
+        businessPremisesOwnership: "",
+        businessPincode: "",
+
+
+
+        // ___common________:-
+        firstName: "",
+        lastName: "",
+        number: "",
+        verifyOtp: "",
+        email: "",
+        businessPanNumber: "",
+        loanAmount: "",
+        tenure: "",
+        loanPurpose: "",
+        usage: "",
+        city:"",
+        state:"",
+        annualTurnOver: "",
+        finalisedCar: "",
+        yearOfManufacture: '',
+        variant: '',
+        model: '',
+        manufacturer: '',
