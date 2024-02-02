@@ -10,7 +10,15 @@ const app = express();
 const PORT = Number(process.env.PORT) || 3000;
 
 app
-  .use(cors())
+  .use(cors({
+    origin: [
+      "http://localhost:3000",
+      "https://e-chirp-server.vercel.app",
+      "https://api.eventchirp.com/",
+      "http://127.0.0.1:5500",
+    ],
+    credentials: true,
+  }))
   .set("x-powered-by", false)
   .use(express.urlencoded({ extended: true }))
   .use(express.json());
