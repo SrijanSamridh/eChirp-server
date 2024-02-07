@@ -14,8 +14,11 @@ app
     origin: [
       "http://localhost:3000",
       "https://e-chirp-server.vercel.app",
-      "https://api.eventchirp.com/",
+      "https://e-chirp-web-app.vercel.app",
       "http://127.0.0.1:5500",
+      "https://app.eventchirp.com",
+      "https://api.eventchirp.com/",
+
     ],
     credentials: true,
   }))
