@@ -18,7 +18,6 @@ app
       "http://127.0.0.1:5500",
       "https://app.eventchirp.com",
       "https://api.eventchirp.com/",
-
     ],
     credentials: true,
   }))
