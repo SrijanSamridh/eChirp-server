@@ -24,19 +24,26 @@ userSchema.pre("save", async function (next) {
   // Increment counters based on certain conditions
   if (this.isNew) {
     // For new user creation
-    // Increment numberOfFriends, numberOfEventsCreated, etc.
+    // Incrementing numberOfFriends, numberOfEventsCreated, etc.
     this.numberOfFriends = this.friends.length;
     this.numberOfEventsCreated = this.myCreatedEvents.length;
     this.numberOfEventsAttended = this.eventsAttended.length;
   } else {
-    // For updates, you might need to handle changes in friends, myCreatedEvents, etc.
-    // Example: check if friends array changed and update numberOfFriends accordingly
+    // check if friends array changed and update numberOfFriends accordingly
     const friendsChanged = this.isModified("friends");
     if (friendsChanged) {
       this.numberOfFriends = this.friends.length;
     }
 
-    // Similarly, check and update other counters as needed
+    const createdEvents = this.isModified("myCreatedEvents");
+    if (createdEvents) {
+      this.numberOfEventsCreated = this.numberOfEventsCreated.length;
+    }
+
+    const attendedEvents = this.isModified("eventsAttended");
+    if (attendedEvents) {
+      this.numberOfEventsAttended = this.numberOfEventsAttended.length;
+    }
   }
 
   next();
