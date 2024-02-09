@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 
-const auth = async (req, res, next) => {
+const Auth = async (req, res, next) => {
     try {
         // get token from header
         const token = req.header('x-auth-token');
@@ -26,4 +26,4 @@ const auth = async (req, res, next) => {
     }
 }
 
-module.exports = auth;
+module.exports = Auth;

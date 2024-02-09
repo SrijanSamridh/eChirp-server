@@ -165,8 +165,10 @@ eventRoute.delete("/:eventID", async (req, res) => {
       return res.status(404).json({ message: "Event not found" });
     }
 
-    if(event.dateOfEvent <= new Date()){
-        return res.status(404).json({message: "Event can't be Canceled a day before or after!"});
+    if (event.dateOfEvent <= new Date()) {
+      return res
+        .status(404)
+        .json({ message: "Event can't be Canceled a day before or after!" });
     }
 
     // Update each participant's attended events count
