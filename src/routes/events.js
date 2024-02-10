@@ -72,9 +72,10 @@ eventRoute.get("/created", Auth, async (req, res) => {
 });
 
 // Join event route
-eventRoute.post("/join", async (req, res) => {
+eventRoute.post("/join", Auth, async (req, res) => {
+  const userID = req.user.id;
   try {
-    const { eventID, userID } = req.body;
+    const { eventID } = req.body;
 
     const event = await Event.findById(eventID);
     if (!event) {
