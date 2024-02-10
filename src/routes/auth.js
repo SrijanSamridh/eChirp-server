@@ -80,7 +80,7 @@ authRouter.post("/signin", async (req, res) => {
 
 // Get user data 
 authRouter.get('/', Auth, async (req, res) =>{
-  const userId = req.user; // Assuming Auth middleware sets user data in req.user
+  const userId = req.user.id;
   try {
       const user = await User.findById(userId);
       if(!user){

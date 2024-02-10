@@ -18,7 +18,7 @@ const Auth = async (req, res, next) => {
         }
 
         // add user from payload
-        req.user = verify.id;
+        req.user = verify;
         req.token = token;
         next();
     } catch (err) {
