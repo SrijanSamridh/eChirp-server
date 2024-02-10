@@ -7,7 +7,7 @@ const { connectDatabase } = require("./config/mongodb");
 dotenv.config();
 connectDatabase();
 const app = express();
-const PORT = Number(process.env.PORT) || 3000;
+const PORT = Number(process.env.PORT) || 8080;
 
 app
   .use(cors({
