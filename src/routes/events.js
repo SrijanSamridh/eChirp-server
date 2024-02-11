@@ -146,7 +146,7 @@ eventRoute.get("/upcoming", Auth, async (req, res) => {
     const upcomingEvents = await Event.find({
       _id: { $in: eventsAttended }, // Event ID is in the user's eventsAttended
       dateOfEvent: { $gte: currentDate }, // Event's date is after or equal to current date
-    }).sort({ dateOfEvent }); // Sort events by ascending order of dateOfEvent
+    }).sort({ dateOfEvent: 1 }); // Sort events by ascending order of dateOfEvent
 
     res.status(200).json({ events: upcomingEvents });
   } catch (error) {
