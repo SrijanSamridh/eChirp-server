@@ -1,7 +1,7 @@
 const express = require("express");
 const Event = require("../models/event.models");
 const User = require("../models/user.models");
-const Auth = require('../middlewares/auth')
+const Auth = require("../middlewares/auth");
 
 const eventRoute = express.Router();
 
@@ -9,26 +9,26 @@ const eventRoute = express.Router();
 eventRoute.get("/", Auth, async (req, res) => {
   const userID = req.user.id;
   try {
-      // Find the user by ID
-      const user = await User.findById(userID);
-      if (!user) {
-          return res.status(404).json({ message: "User not found" });
-      }
+    // Find the user by ID
+    const user = await User.findById(userID);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
 
-      // Get the events attended by the user
-      const eventsAttended = user.eventsAttended;
+    // Get the events attended by the user
+    const eventsAttended = user.eventsAttended;
 
-      // Find all events where createdBy is not the user's ID and eventMode is not private
-      const notJoinedEvents = await Event.find({
-          createdBy: { $ne: userID }, // createdBy is not equal to user's ID
-          eventMode: { $ne: "PRIVATE" }, // eventMode is not equal to private
-          _id: { $nin: eventsAttended }, // Event ID is not in the user's eventsAttended
-      });
+    // Find all events where createdBy is not the user's ID and eventMode is not private
+    const notJoinedEvents = await Event.find({
+      createdBy: { $ne: userID }, // createdBy is not equal to user's ID
+      eventMode: { $ne: "PRIVATE" }, // eventMode is not equal to private
+      _id: { $nin: eventsAttended }, // Event ID is not in the user's eventsAttended
+    });
 
-      res.status(200).json({ events: notJoinedEvents });
+    res.status(200).json({ events: notJoinedEvents });
   } catch (error) {
-      console.error("Error fetching not joined events:", error);
-      res.status(500).json({ message: "Internal server error" });
+    console.error("Error fetching not joined events:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
@@ -108,7 +108,7 @@ eventRoute.post("/join", Auth, async (req, res) => {
   }
 });
 
-// Get user's attended events route
+// Get user's attended events route     // TODO: add a check to show only those events whose dates have passed from the current date.
 eventRoute.get("/attended", Auth, async (req, res) => {
   const userID = req.user.id;
   try {
@@ -129,7 +129,6 @@ eventRoute.get("/attended", Auth, async (req, res) => {
 eventRoute.get("/upcoming", Auth, async (req, res) => {
   const userID = req.user.id;
   try {
-
     // Find the user by ID
     const user = await User.findById(userID);
     if (!user) {
@@ -152,6 +151,25 @@ eventRoute.get("/upcoming", Auth, async (req, res) => {
   } catch (error) {
     console.error("Error fetching upcoming events:", error);
     res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// Get single event shareable link
+eventRoute.get("/:eventID", async (req, res) => {
+  try {
+    const { eventID } = req.params;
+
+    // Find the event by its ID
+    const event = await Event.findById(eventID);
+    if (!event) {
+      return res.status(404).json({ message: "Event not found" });
+    }
+
+    // Send the event ID in the response
+    res.status(200).json(event);
+  } catch (error) {
+    console.error("Error fetching event:", error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 });
 
