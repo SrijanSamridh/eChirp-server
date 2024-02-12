@@ -33,12 +33,13 @@ eventRoute.get("/", Auth, async (req, res) => {
 });
 
 // Create event route
-eventRoute.post("/", async (req, res) => {
+eventRoute.post("/", Auth, async (req, res) => {
+  const userId = req.user.id;
   try {
-    const newEvent = new Event(req.body);
+    const newEvent = new Event({ ...req.body, createdBy: userId });
     const event = await newEvent.save();
 
-    const user = await User.findById(req.body.createdBy);
+    const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
