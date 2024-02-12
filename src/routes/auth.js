@@ -94,6 +94,47 @@ authRouter.get('/', Auth, async (req, res) =>{
   }
 });
 
+// update user Details ---> PUT Method 
+authRouter.put("/", Auth, async (req, res) => {
+  const userId = req.user.id;
+  const { username, email, firstName, lastName, bio } = req.body;
+
+  try {
+    // Fetch the user from the database
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Update user details
+    if (username !== undefined) {
+      user.username = username;
+    }
+    if (email !== undefined) {
+      user.email = email;
+    }
+    if (firstName !== undefined) {
+      user.firstName = firstName;
+    }
+    if (lastName !== undefined) {
+      user.lastName = lastName;
+    }
+    if (bio !== undefined) {
+      user.bio = bio;
+    }
+
+    // Save the updated user data to the database
+    await user.save();
+
+    res.status(200).json({ message: "User details updated successfully", user });
+  } catch (error) {
+    console.error("Error updating user details:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+
+
 
 module.exports = authRouter;
 
