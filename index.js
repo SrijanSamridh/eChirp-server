@@ -33,7 +33,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/auth", require("./src/routes/auth.js"));
-app.use("/api/friend-request", require("./src/routes/friends.js"));
+app.use("/api/friend", require("./src/routes/friends.js"));
 app.use("/api/events", require("./src/routes/events.js"));
 
 const text = `

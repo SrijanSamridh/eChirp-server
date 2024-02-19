@@ -1,42 +1,46 @@
 const express = require("express");
 const User = require("../models/user.models");
+const Auth = require("../middlewares/auth");
 const friendRoute = express.Router();
-const { Types } = require("mongoose");
+const mongoose = require("mongoose");
 
 // Send Friend Request Route
-friendRoute.post("/send/:accepterId/:senderId", async (req, res) => {
-  const { accepterId, senderId } = req.params;
+friendRoute.post("/send", Auth, async (req, res) => {
+  const userID = req.user.id;
+  const { friendID } = req.body;
 
   try {
     // Check if both users exist
-    const accepter = await User.findById(accepterId);
-    const sender = await User.findById(senderId);
+    const friend = await User.findById(friendID);
+    const user = await User.findById(userID);
 
-    if (!accepter || !sender) {
-      return res.status(404).json({ error: "One or more users not found" });
+    if (!friend || !user) {
+      // Combine the checks for friend and user existence
+      return res.status(404).json({ error: "Friend or user not found!" });
     }
 
     // Check if a friend request already exists
     if (
-      accepter.friendRequests.includes(sender._id) ||
-      sender.friendRequests.includes(accepter._id)
+      friend.friendRequests.includes(user._id) ||
+      user.friendRequests.includes(friend._id)
     ) {
       return res.status(400).json({ error: "Friend request already sent" });
     }
 
+    // Check if they are already friends
     if (
-      accepter.friends.includes(sender._id) ||
-      sender.friends.includes(accepter._id)
+      friend.friends.includes(user._id) ||
+      user.friends.includes(friend._id)
     ) {
       return res.status(400).json({ error: "Already Friends!" });
     }
 
-    // Add friend request to accepter's friendRequests array
-    accepter.friendRequests.push(sender._id);
-    await accepter.save();
+    // Add friend request to friend's friendRequests array
+    friend.friendRequests.push(user._id);
+    await friend.save();
 
     res.json({
-      message: `Friend request sent successfully ! ${sender.username} sended the request to ${accepter.username}`,
+      message: `Friend request sent successfully! ${user.username} sent the request to ${friend.username}`,
     });
   } catch (error) {
     console.error(error);
@@ -45,38 +49,39 @@ friendRoute.post("/send/:accepterId/:senderId", async (req, res) => {
 });
 
 // Accept Friend Request Route
-friendRoute.post("/accept/:accepterId/:senderId", async (req, res) => {
-  const { accepterId, senderId } = req.params;
+friendRoute.post("/accept", Auth, async (req, res) => {
+  const userID = req.user.id;
+  const { friendID } = req.body;
 
   try {
     // Check if both users exist
-    const accepter = await User.findById(accepterId);
-    const sender = await User.findById(senderId);
+    const user = await User.findById(userID);
+    const friend = await User.findById(friendID);
 
-    if (!accepter || !sender) {
+    if (!user || !friend) {
       return res.status(404).json({ error: "One or more users not found" });
     }
 
-    // Check if there is a friend request from accepter to sender
-    if (!accepter.friendRequests.includes(sender._id)) {
+    // Check if there is a friend request from friend to user
+    if (!user.friendRequests.includes(friend._id)) {
       return res.status(400).json({ error: "No friend request found" });
     }
 
-    // Remove friend request from accepter's friendRequests array
-    accepter.friendRequests = accepter.friendRequests.filter(
-      (requestId) => !requestId.equals(sender._id)
+    // Remove friend request from user's friendRequests array
+    user.friendRequests = user.friendRequests.filter(
+      (requestId) => !requestId.equals(friend._id)
     );
 
-    // Add sender to accepter's friends array and vice versa
-    accepter.friends.push(sender._id);
-    sender.friends.push(accepter._id);
+    // Add friend to user's friends array and vice versa
+    user.friends.push(friend._id);
+    friend.friends.push(user._id);
 
     // Save changes to both users
-    await accepter.save();
-    await sender.save();
+    await user.save();
+    await friend.save();
 
     res.json({
-      message: `${accepter.username} accepted ${sender.username} request successfully`,
+      message: `${user.username} accepted ${friend.username} request successfully`,
     });
   } catch (error) {
     console.error(error);
@@ -84,17 +89,18 @@ friendRoute.post("/accept/:accepterId/:senderId", async (req, res) => {
   }
 });
 
-friendRoute.get("/mutual/:userId1/:userId2", async (req, res) => {
-  const { userId1, userId2 } = req.params;
+friendRoute.get("/mutual/:friendID", Auth, async (req, res) => {
+  const userID = req.user.id;
+  const { friendID } = req.params;
 
   try {
     // Find the users
-    const user1 = await User.findById(userId1).populate("friends");
-    const user2 = await User.findById(userId2).populate("friends");
+    const user = await User.findById(userID).populate("friends");
+    const friend = await User.findById(friendID).populate("friends");
 
     // Get mutual friends
-    const mutualFriends = user1.friends.filter((friendId) =>
-      user2.friends.includes(friendId.toString())
+    const mutualFriends = user.friends.filter((friendId) =>
+      friend.friends.includes(friendId.toString())
     );
 
     res.json({ mutualFriends });
@@ -104,31 +110,31 @@ friendRoute.get("/mutual/:userId1/:userId2", async (req, res) => {
   }
 });
 
-
 //! Get Friends of Friends Route
-friendRoute.get('/friends-of-friends/:userId', async (req, res) => {
-  const { userId } = req.params;
+friendRoute.get("/friends-of-friends/:friendID", Auth, async (req, res) => {
+  const userID = req.user.id;
+  const { friendID } = req.params;
 
   try {
-    // Validate that userId is a valid ObjectId
-    if (!Types.ObjectId.isValid(userId)) {
-      return res.status(400).json({ error: 'Invalid user ID' });
+    // Validate that friendID is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(friendID)) {
+      return res.status(400).json({ error: "Invalid user ID" });
     }
 
     // Find the user and populate friends
-    const user = await User.findById(userId).populate('friends');
+    const user = await User.findById(userID).populate("friends");
 
     // Check if the user exists
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(404).json({ error: "User not found" });
     }
 
     // Get friends of friends
     const friendsOfFriends = [];
     for (const friendId of user.friends) {
       // Ensure friendId is a valid ObjectId before querying the database
-      if (Types.ObjectId.isValid(friendId)) {
-        const friend = await User.findById(friendId).populate('friends');
+      if (mongoose.Types.ObjectId.isValid(friendId)) {
+        const friend = await User.findById(friendId).populate("friends");
         if (friend) {
           friendsOfFriends.push(...friend.friends);
         }
@@ -136,19 +142,47 @@ friendRoute.get('/friends-of-friends/:userId', async (req, res) => {
     }
 
     // Remove duplicates and the user and user's direct friends from the list
-    const uniqueFriendsOfFriends = Array.from(new Set(friendsOfFriends.map(friend => friend.toString())))
-      .filter(friendId => !user.friends.map(f => f.toString()).includes(friendId) && friendId !== userId);
+    // const uniqueFriendsOfFriends = [];
+    // for (const friendId of friendsOfFriends) {
+    //   let isDuplicate = false;
+    //   // Ensure friendId is a valid ObjectId
+    //   if (mongoose.Types.ObjectId.isValid(friendId)) {
+    //     // Check if friendId is not the user, user's friends, or duplicate
+    //     if (friendId.toString() !== userID.toString()) {
+    //       for (const userFriendId of user.friends) {
+    //         if (userFriendId.toString() === friendId.toString()) {
+    //           isDuplicate = true;
+    //           break;
+    //         }
+    //       }
+    //       if (!isDuplicate) {
+    //         for (const directFriendId of friendsOfFriends) {
+    //           if (
+    //             directFriendId.toString() === friendId.toString() &&
+    //             directFriendId.toString() !== userID
+    //           ) {
+    //             isDuplicate = true;
+    //             break;
+    //           }
+    //         }
+    //       }
+    //       if (!isDuplicate) {
+    //         uniqueFriendsOfFriends.push(friendId.toString());
+    //       }
+    //     }
+    //   }
+    // }
 
     // Populate details of friends of friends
-    const friendsOfFriendsDetails = await User.find({ _id: { $in: uniqueFriendsOfFriends } });
+    const friendsOfFriendsDetails = await User.find({
+      _id: { $in: friendsOfFriends },
+    });
 
     res.json({ friendsOfFriends: friendsOfFriendsDetails });
-
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
 module.exports = friendRoute;
-

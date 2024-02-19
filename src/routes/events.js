@@ -109,11 +109,16 @@ eventRoute.post("/join", Auth, async (req, res) => {
   }
 });
 
-// Get user's attended events route     // TODO: add a check to show only those events whose dates have passed from the current date.
+// Get user's attended events route  
 eventRoute.get("/attended", Auth, async (req, res) => {
   const userID = req.user.id;
+  const currentDate = new Date();
+  
   try {
-    const user = await User.findById(userID).populate("eventsAttended");
+    const user = await User.findById(userID).populate({
+      path: "eventsAttended",
+      match: { dateOfEvent: { $lt: currentDate } } // Only include events whose dateOfEvent is less than the current date
+    });
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
