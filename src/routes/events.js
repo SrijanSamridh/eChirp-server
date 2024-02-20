@@ -2,7 +2,7 @@ const express = require("express");
 const Event = require("../models/event.models");
 const User = require("../models/user.models");
 const Auth = require("../middlewares/auth");
-const { putObjectUrl } = require('../services/s3');
+const { putObjectUrl, getObjectUrl } = require('../services/s3');
 
 const eventRoute = express.Router();
 
@@ -33,19 +33,25 @@ eventRoute.get("/", Auth, async (req, res) => {
   }
 });
 
+
 // Create event route
 eventRoute.post("/", Auth, async (req, res) => {
   const userId = req.user.id;
   try {
     // Upload cover image to S3 and get signed URL
-    const coverImageUrl = await putObjectUrl(`cover-image-${userId}-${Date.now()}.jpeg`, 'image/jpeg');
+    await putObjectUrl(`cover-image-${userId}.jpeg`, 'image/jpeg');
+    const coverImageUrl = await getObjectUrl(`cover-image-${userId}.jpeg`);
 
     // Upload other images to S3 and get signed URLs if they exist
     const imageUrls = {};
     const imageFields = ['Img1Path', 'Img2Path', 'Img3Path', 'Img4Path'];
     for (const field of imageFields) {
       if (req.body[field]) {
-        imageUrls[field.replace('Path', 'Url')] = await putObjectUrl(`image-${userId}-${Date.now()}.jpeg`, 'image/jpeg');
+        await putObjectUrl(`image-${userId}-${field.replace('Path', '')}.jpeg`, 'image/jpeg');
+        const imageUrl = await getObjectUrl(`image-${userId}-${field.replace('Path', '')}.jpeg`);
+        imageUrls[field.replace('Path', 'Url')] = imageUrl;
+        // Store signed image URL in MongoDB
+        req.body[field.replace('Path', 'Url')] = imageUrl;
       }
     }
 
@@ -73,7 +79,6 @@ eventRoute.post("/", Auth, async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
-
 
 // Get user's created events route
 eventRoute.get("/created", Auth, async (req, res) => {
