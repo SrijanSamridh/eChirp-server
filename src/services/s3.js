@@ -24,7 +24,8 @@ async function putObjectUrl(fileName, contentType){
         Key: `uploads/user-uploads/${fileName}`,
         ContentType: contentType,
     });
-    const url = await getSignedUrl(s3Client, command);
+    await getSignedUrl(s3Client, command);
+    const url = await getObjectUrl(`uploads/user-uploads/${fileName}`);
     return url;
 }
 

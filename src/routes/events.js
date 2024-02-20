@@ -39,16 +39,14 @@ eventRoute.post("/", Auth, async (req, res) => {
   const userId = req.user.id;
   try {
     // Upload cover image to S3 and get signed URL
-    await putObjectUrl(`cover-image-${userId}.jpeg`, 'image/jpeg');
-    const coverImageUrl = await getObjectUrl(`cover-image-${userId}.jpeg`);
+    const coverImageUrl = await putObjectUrl(`cover-image-${userId}.jpeg`, 'image/jpeg');
 
     // Upload other images to S3 and get signed URLs if they exist
     const imageUrls = {};
     const imageFields = ['Img1Path', 'Img2Path', 'Img3Path', 'Img4Path'];
     for (const field of imageFields) {
       if (req.body[field]) {
-        await putObjectUrl(`image-${userId}-${field.replace('Path', '')}.jpeg`, 'image/jpeg');
-        const imageUrl = await getObjectUrl(`image-${userId}-${field.replace('Path', '')}.jpeg`);
+        const imageUrl = await putObjectUrl(`image-${userId}-${field.replace('Path', '')}.jpeg`, 'image/jpeg');
         imageUrls[field.replace('Path', 'Url')] = imageUrl;
         // Store signed image URL in MongoDB
         req.body[field.replace('Path', 'Url')] = imageUrl;
@@ -79,6 +77,8 @@ eventRoute.post("/", Auth, async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
+
+module.exports = eventRoute;
 
 // Get user's created events route
 eventRoute.get("/created", Auth, async (req, res) => {
