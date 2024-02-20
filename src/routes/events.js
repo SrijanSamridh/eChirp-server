@@ -2,6 +2,7 @@ const express = require("express");
 const Event = require("../models/event.models");
 const User = require("../models/user.models");
 const Auth = require("../middlewares/auth");
+const { putObjectUrl } = require('../services/s3');
 
 const eventRoute = express.Router();
 
@@ -36,14 +37,32 @@ eventRoute.get("/", Auth, async (req, res) => {
 eventRoute.post("/", Auth, async (req, res) => {
   const userId = req.user.id;
   try {
-    const newEvent = new Event({ ...req.body, createdBy: userId });
+    // Upload cover image to S3 and get signed URL
+    const coverImageUrl = await putObjectUrl(`cover-image-${userId}-${Date.now()}.jpeg`, 'image/jpeg');
+
+    // Upload other images to S3 and get signed URLs if they exist
+    const imageUrls = {};
+    const imageFields = ['Img1Path', 'Img2Path', 'Img3Path', 'Img4Path'];
+    for (const field of imageFields) {
+      if (req.body[field]) {
+        imageUrls[field.replace('Path', 'Url')] = await putObjectUrl(`image-${userId}-${Date.now()}.jpeg`, 'image/jpeg');
+      }
+    }
+
+    // Create event document with signed image URLs
+    const newEvent = new Event({ 
+      ...req.body,
+      createdBy: userId,
+      coverImgUrl: coverImageUrl,
+      ...imageUrls
+    });
     const event = await newEvent.save();
 
+    // Update user's created events
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-
     user.myCreatedEvents.push(event._id);
     user.numberOfEventsCreated = user.myCreatedEvents.length;
     await user.save();
@@ -54,6 +73,7 @@ eventRoute.post("/", Auth, async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
+
 
 // Get user's created events route
 eventRoute.get("/created", Auth, async (req, res) => {
