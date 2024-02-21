@@ -1,11 +1,12 @@
 const { S3Client, GetObjectCommand, PutObjectCommand, ListObjectsV2Command, DeleteObjectCommand } = require("@aws-sdk/client-s3");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
+require("dotenv").config();
 
 const s3Client = new S3Client({
     region: "ap-south-1",
     credentials: {
-        accessKeyId: 'AKIA2PEHVGMVT5OMD4CQ',
-        secretAccessKey: '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'
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
     }
 });
 
