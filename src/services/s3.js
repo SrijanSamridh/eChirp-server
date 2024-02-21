@@ -43,8 +43,7 @@ async function putObjectUrl(fileName, contentType) {
             Key: `uploads/user-uploads/${fileName}`,
             ContentType: contentType,
         });
-        await s3Client.send(command);
-        const url = await getObjectUrl(`uploads/user-uploads/${fileName}`);
+        const url = await getSignedUrl(s3Client, command);
         return url;
     } catch (error) {
         console.error("Error putting object to S3 and getting signed URL:", error);

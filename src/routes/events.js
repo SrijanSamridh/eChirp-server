@@ -34,7 +34,7 @@ eventRoute.get("/", Auth, async (req, res) => {
 });
 
 
-// Create event route
+// Create event route // TODO: make suer to upload file from the front-end through the upload URl 
 eventRoute.post("/", Auth, async (req, res) => {
   const userId = req.user.id;
   try {

@@ -212,4 +212,31 @@ friendRoute.delete("/:id", Auth, async (res, req) => {
   }
 });
 
+
+// Route to search for users
+friendRoute.get("/search", async (req, res) => {
+  try {
+    const searchTerm = req.query.term?.trim(); // Get the search term from query params
+
+    if(!searchTerm){
+      return res.json([]);
+    }
+    // Use the $or operator to search across multiple fields
+    const users = await User.find({
+      $or: [
+        { username: { $regex: searchTerm, $options: "i" } },
+        { firstName: { $regex: searchTerm, $options: "i" } },
+        { lastName: { $regex: searchTerm, $options: "i" } },
+        { bio: { $regex: searchTerm, $options: "i" } }
+      ]
+    });
+
+    res.json(users);
+  } catch (error) {
+    console.error("Error searching for users:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+
 module.exports = friendRoute;
