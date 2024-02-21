@@ -22,7 +22,7 @@ async function getObjectUrl(key) {
             Bucket: "bucket.eventchirp.com",
             Key: key
         });
-        const url = await getSignedUrl(s3Client, command, { expiresIn: 20 });
+        const url = await getSignedUrl(s3Client, command);
         return url;
     } catch (error) {
         console.error("Error getting signed URL for object:", error);
