@@ -1,8 +1,8 @@
-const { S3Client, GetObjectCommand, PutObjectCommand, ListObjectsV2Command, DeleteObjectCommand } = require("@aws-sdk/client-s3");
-const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
+const S3 = require("@aws-sdk/client-s3");
+const Presigner = require("@aws-sdk/s3-request-presigner");
 require("dotenv").config();
 
-const s3Client = new S3Client({
+const s3Client = new S3({
     region: "ap-south-1",
     credentials: {
         accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -10,43 +10,68 @@ const s3Client = new S3Client({
     }
 });
 
-async function getObjectUrl(key){
-    const command = new GetObjectCommand({
-        Bucket: "bucket.eventchirp.com",
-        Key: key
-    });
-    const url = await getSignedUrl(s3Client, command, {expiresIn: 20});
-    return url;
+const presigner = new Presigner({ client: s3Client });
+
+// Function for generating a presigned URL to GET an object
+async function getObjectUrl(key) {
+    try {
+        const command = new S3.GetObjectCommand({
+            Bucket: "bucket.eventchirp.com",
+            Key: key
+        });
+        const url = await presigner.presignGetObject(command, { expiresIn: 20 });
+        return url;
+    } catch (error) {
+        console.error("Error generating presigned URL:", error);
+        throw error; // Re-throw for proper handling
+    }
 }
 
-async function putObjectUrl(fileName, contentType){
-    const command = new PutObjectCommand({
-        Bucket: "bucket.eventchirp.com",
-        Key: `uploads/user-uploads/${fileName}`,
-        ContentType: contentType,
-    });
-    await getSignedUrl(s3Client, command);
-    const url = await getObjectUrl(`uploads/user-uploads/${fileName}`);
-    return url;
+// Function for uploading a file and returning its presigned URL
+async function putObjectUrl(fileName, contentType) {
+    try {
+        const command = new S3.PutObjectCommand({
+            Bucket: "bucket.eventchirp.com",
+            Key: `uploads/user-uploads/${fileName}`,
+            ContentType: contentType,
+        });
+        await presigner.presignPutObject(command);
+        const url = await getObjectUrl(`uploads/user-uploads/${fileName}`);
+        return url;
+    } catch (error) {
+        console.error("Error uploading file:", error);
+        throw error; // Re-throw for proper handling
+    }
 }
 
-async function listObjects(){
-    const command = new ListObjectsV2Command({
-        Bucket: "bucket.eventchirp.com",
-        Key: `/`,
-    });
-
-    const result = await s3Client.send(command);
-    return result;
+// Function for listing objects in the S3 bucket
+async function listObjects() {
+    try {
+        const command = new S3.ListObjectsV2Command({
+            Bucket: "bucket.eventchirp.com",
+            Prefix: "", // Use Prefix for more flexibility
+        });
+        const result = await s3Client.send(command);
+        return result;
+    } catch (error) {
+        console.error("Error listing objects:", error);
+        throw error; // Re-throw for proper handling
+    }
 }
 
-async function deleteObject(key){
-    const cmd = new DeleteObjectCommand({
-        Bucket: "bucket.eventchirp.com",
-        Key: key
-    });
-
-    const result = await s3Client.send(cmd);
+// Function for deleting an object
+async function deleteObject(key) {
+    try {
+        const command = new S3.DeleteObjectCommand({
+            Bucket: "bucket.eventchirp.com",
+            Key: key
+        });
+        const result = await s3Client.send(command);
+        return result; // Return result for confirmation
+    } catch (error) {
+        console.error("Error deleting object:", error);
+        throw error; // Re-throw for proper handling
+    }
 }
 
 module.exports = { getObjectUrl, putObjectUrl, listObjects, deleteObject };

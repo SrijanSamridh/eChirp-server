@@ -78,7 +78,6 @@ eventRoute.post("/", Auth, async (req, res) => {
   }
 });
 
-module.exports = eventRoute;
 
 // Get user's created events route
 eventRoute.get("/created", Auth, async (req, res) => {
