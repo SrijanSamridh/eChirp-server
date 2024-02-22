@@ -112,26 +112,26 @@ friendRoute.get("/mutual/:friendID", Auth, async (req, res) => {
 });
 
 // Get Friends of Friends Route
-friendRoute.get('/friends-of-friends/:userId', Auth, async (req, res) => {
+friendRoute.get("/friends-of-friends/:userId", Auth, async (req, res) => {
   const { userId } = req.params;
   try {
     if (!mongoose.Types.ObjectId.isValid(userId)) {
-      return res.status(400).json({ error: 'Invalid user ID' });
+      return res.status(400).json({ error: "Invalid user ID" });
     }
 
     let data = await User.aggregate([
       {
         $match: {
-          _id: new mongoose.Types.ObjectId(userId)
-        }
+          _id: new mongoose.Types.ObjectId(userId),
+        },
       },
       {
         $lookup: {
           from: "users",
           localField: "friends",
           foreignField: "_id",
-          as: "friendsList"
-        }
+          as: "friendsList",
+        },
       },
       {
         $lookup: {
@@ -142,13 +142,13 @@ friendRoute.get('/friends-of-friends/:userId', Auth, async (req, res) => {
             {
               $match: {
                 _id: {
-                  $ne: new mongoose.Types.ObjectId(userId)
-                }
-              }
-            }
+                  $ne: new mongoose.Types.ObjectId(userId),
+                },
+              },
+            },
           ],
-          as: "friendsOfFriends"
-        }
+          as: "friendsOfFriends",
+        },
       },
       {
         $project: {
@@ -157,15 +157,21 @@ friendRoute.get('/friends-of-friends/:userId', Auth, async (req, res) => {
               input: "$friendsOfFriends",
               as: "friend",
               cond: {
-                $in: [new mongoose.Types.ObjectId(req.user.id), "$$friend.friends"]
-              }
-            }
-          }
-        }
-      }
+                $in: [
+                  new mongoose.Types.ObjectId(req.user.id),
+                  "$$friend.friends",
+                ],
+              },
+            },
+          },
+        },
+      },
     ]);
 
-    const totalFriendsOfFriends = data.reduce((total, user) => total + user.friendsOfFriends.length, 0);
+    const totalFriendsOfFriends = data.reduce(
+      (total, user) => total + user.friendsOfFriends.length,
+      0
+    );
 
     return res.json({ count: totalFriendsOfFriends, data: data });
   } catch (error) {
@@ -173,7 +179,6 @@ friendRoute.get('/friends-of-friends/:userId', Auth, async (req, res) => {
     res.status(500).json({ error: `Internal Server Error : ${error}` });
   }
 });
-
 
 friendRoute.delete("/:id", Auth, async (res, req) => {
   const userId = req.user.id;
@@ -212,13 +217,30 @@ friendRoute.delete("/:id", Auth, async (res, req) => {
   }
 });
 
+// Route to fetch user's friends
+friendRoute.get("/my-friends", Auth, async (req, res) => {
+  try {
+    const userId = req.user.id; 
+
+    const user = await User.findById(userId).populate("friends");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json(user.friends); 
+  } catch (error) {
+    console.error("Error fetching friends:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
 
 // Route to search for users
 friendRoute.get("/search", async (req, res) => {
   try {
-    const searchTerm = req.query.term?.trim(); // Get the search term from query params
+    const searchTerm = req.query.term?.trim(); // Get the search term from query params and trim extra spaces
 
-    if(!searchTerm){
+    if (!searchTerm) {
       return res.json([]);
     }
     // Use the $or operator to search across multiple fields
@@ -227,8 +249,8 @@ friendRoute.get("/search", async (req, res) => {
         { username: { $regex: searchTerm, $options: "i" } },
         { firstName: { $regex: searchTerm, $options: "i" } },
         { lastName: { $regex: searchTerm, $options: "i" } },
-        { bio: { $regex: searchTerm, $options: "i" } }
-      ]
+        { bio: { $regex: searchTerm, $options: "i" } },
+      ],
     });
 
     res.json(users);
