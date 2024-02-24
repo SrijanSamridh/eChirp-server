@@ -218,7 +218,7 @@ friendRoute.delete("/:id", Auth, async (res, req) => {
 });
 
 // Route to fetch user's friends
-friendRoute.get("/my-friends", Auth, async (req, res) => {
+friendRoute.get("/friends", Auth, async (req, res) => {
   try {
     const userId = req.user.id; 
 
@@ -232,6 +232,82 @@ friendRoute.get("/my-friends", Auth, async (req, res) => {
   } catch (error) {
     console.error("Error fetching friends:", error);
     res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// Route to fetch potential friends
+friendRoute.get("/potential", Auth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // Find the user by ID
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(400).json({ message: "Invalid user ID" });
+    }
+
+    // Pipeline to find potential friends
+    const pipeline = [
+      {
+        $match: {
+          _id: userId, // Use mongoose.Types.ObjectId
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          let: { friendsList: "$friends" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $ne: ["$_id", userId] }, // Exclude the user
+                    { $not: { $in: ["$_id", "$$friendsList"] } }, // Exclude existing friends
+                  ],
+                },
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+                username: 1,
+                // Add other desired public fields
+              },
+            },
+          ],
+          as: "potentialFriends",
+        },
+      },
+      {
+        $unwind: "$potentialFriends",
+      },
+      {
+        $group: {
+          _id: "$potentialFriends._id",
+          count: { $sum: 1 }, // Count occurrences (optional)
+          friend: { $first: "$potentialFriends" }, // Get friend details
+        },
+      },
+      {
+        $project: {
+          _id: 0, // Exclude _id field from the output
+          friend: 1, // Include friend field
+          count: 1, // Include count field
+        },
+      },
+      {
+        $sort: { count: -1 }, // Optionally sort by mutual friends count
+      },
+    ];
+
+    // Execute the aggregation pipeline
+    const potentialFriends = await User.aggregate(pipeline);
+
+    res.json({ potentialFriends });
+  } catch (error) {
+    console.error("Error fetching potential friends:", error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 });
 
