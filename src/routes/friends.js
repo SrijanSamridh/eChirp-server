@@ -250,7 +250,7 @@ friendRoute.get("/potential", Auth, async (req, res) => {
     const pipeline = [
       {
         $match: {
-          _id: new mongoose.Types.ObjectId(userId), // Use mongoose.Types.ObjectId
+          _id: new mongoose.Types.ObjectId(userId),
         },
       },
       {
@@ -272,7 +272,8 @@ friendRoute.get("/potential", Auth, async (req, res) => {
               $project: {
                 _id: 1,
                 username: 1,
-                bio: 1
+                bio: 1,
+                profilePicture: 1
                 // Add other desired public fields
               },
             },
