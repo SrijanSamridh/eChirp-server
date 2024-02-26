@@ -250,7 +250,7 @@ friendRoute.get("/potential", Auth, async (req, res) => {
     const pipeline = [
       {
         $match: {
-          _id: userId, // Use mongoose.Types.ObjectId
+          _id: new mongoose.Types.ObjectId(userId), // Use mongoose.Types.ObjectId
         },
       },
       {
@@ -262,7 +262,7 @@ friendRoute.get("/potential", Auth, async (req, res) => {
               $match: {
                 $expr: {
                   $and: [
-                    { $ne: ["$_id", userId] }, // Exclude the user
+                    { $ne: ["$_id", new mongoose.Types.ObjectId(userId)] }, // Exclude the user
                     { $not: { $in: ["$_id", "$$friendsList"] } }, // Exclude existing friends
                   ],
                 },
@@ -272,6 +272,7 @@ friendRoute.get("/potential", Auth, async (req, res) => {
               $project: {
                 _id: 1,
                 username: 1,
+                bio: 1
                 // Add other desired public fields
               },
             },
