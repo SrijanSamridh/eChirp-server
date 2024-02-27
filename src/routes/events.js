@@ -2,7 +2,7 @@ const express = require("express");
 const Event = require("../models/event.models");
 const User = require("../models/user.models");
 const Auth = require("../middlewares/auth");
-const { putObjectUrl, getObjectUrl } = require('../services/s3');
+const { putObjectUrl, getObjectUrl } = require("../services/s3");
 
 const eventRoute = express.Router();
 
@@ -33,21 +33,26 @@ eventRoute.get("/", Auth, async (req, res) => {
   }
 });
 
-
-// Create event route // TODO: make suer to upload file from the front-end through the upload URl 
+// Create event route // TODO: make suer to upload file from the front-end through the upload URl
 eventRoute.post("/", Auth, async (req, res) => {
   const userId = req.user.id;
   try {
     // Upload cover image to S3 and get signed URL
-    const coverImageUrl = await putObjectUrl(`cover-image-${userId}.png`, 'image/png');
+    const coverImageUrl = await putObjectUrl(
+      `cover-image-${userId}.png`,
+      "image/png"
+    );
 
     // Upload other images to S3 and get signed URLs if they exist
     const imageUrls = {};
-    const imageFields = ['Img1Path', 'Img2Path', 'Img3Path', 'Img4Path'];
+    const imageFields = ["Img1Path", "Img2Path", "Img3Path", "Img4Path"];
     for (const field of imageFields) {
       if (req.body[field]) {
-        const imageUrl = await putObjectUrl(`image-${userId}-${field.replace('Path', '')}.jpeg`, 'image/jpeg');
-        imageUrls[field.replace('Path', 'Url')] = imageUrl;
+        const imageUrl = await putObjectUrl(
+          `image-${userId}-${field.replace("Path", "")}.jpeg`,
+          "image/jpeg"
+        );
+        imageUrls[field.replace("Path", "Url")] = imageUrl;
       }
     }
 
@@ -56,7 +61,7 @@ eventRoute.post("/", Auth, async (req, res) => {
       ...req.body,
       createdBy: userId,
       coverImgUrl: coverImageUrl,
-      ...imageUrls
+      ...imageUrls,
     };
     const newEvent = new Event(eventData);
     const event = await newEvent.save();
@@ -76,8 +81,6 @@ eventRoute.post("/", Auth, async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
-
-
 
 // Get user's created events route
 eventRoute.get("/created", Auth, async (req, res) => {
@@ -133,15 +136,15 @@ eventRoute.post("/join", Auth, async (req, res) => {
   }
 });
 
-// Get user's attended events route  
+// Get user's attended events route
 eventRoute.get("/attended", Auth, async (req, res) => {
   const userID = req.user.id;
   const currentDate = new Date();
-  
+
   try {
     const user = await User.findById(userID).populate({
       path: "eventsAttended",
-      match: { dateOfEvent: { $lt: currentDate } } // Only include events whose dateOfEvent is less than the current date
+      match: { dateOfEvent: { $lt: currentDate } }, // Only include events whose dateOfEvent is less than the current date
     });
 
     if (!user) {
@@ -181,6 +184,17 @@ eventRoute.get("/upcoming", Auth, async (req, res) => {
   } catch (error) {
     console.error("Error fetching upcoming events:", error);
     res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+eventRoute.get("/uploadPic", Auth, async (req, res) => {
+  try {
+    const userID = req.user.id;
+    const putUrl = await putObjectUrl(`image${userID}.jpeg`, "image/jpeg");
+    res.json({ putUrl });
+  } catch (error) {
+    console.error("Error generating pre-signed URL:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -252,5 +266,7 @@ eventRoute.delete("/:eventID", async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
+
+
 
 module.exports = eventRoute;
