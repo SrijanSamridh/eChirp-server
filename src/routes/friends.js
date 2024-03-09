@@ -357,4 +357,35 @@ friendRoute.get("/search", async (req, res) => {
   }
 });
 
+friendRoute.get("/profile/:id", Auth, async (req, res) => {
+  const userId = req.user.id;
+  const friendId = req.params.id; // Get friend ID from URL parameter
+
+  try {
+    // Validate friendId as an ObjectId to prevent potential MongoDB injection attacks
+    if (!mongoose.Types.ObjectId.isValid(friendId)) {
+      return res.status(400).json({ message: "Invalid friend ID" });
+    }
+
+    // Fetch both users in parallel using Promise.all for efficiency
+    const [user, friend] = await Promise.all([User.findById(userId), User.findById(friendId)]);
+
+    if (!user || !friend) {
+      return res.status(404).json({ message: "User or friend not found" });
+    }
+
+    // Optionally exclude sensitive user data (e.g., password hash) before sending friend details
+    const sanitizedFriend = { ...friend._doc }; // Create a copy to avoid modifying original data
+    delete sanitizedFriend.password; // Remove password if applicable
+
+    res.status(200).json(sanitizedFriend);
+  } catch (err) {
+    console.error("Error fetching friend's data:", err);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+
+
+
 module.exports = friendRoute;
