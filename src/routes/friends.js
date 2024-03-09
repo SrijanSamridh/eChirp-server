@@ -180,14 +180,15 @@ friendRoute.get("/friends-of-friends/:userId", Auth, async (req, res) => {
   }
 });
 
-friendRoute.delete("/:id", Auth, async (res, req) => {
-  const userId = req.user.id;
-  const { friendId } = req.params;
-
+// Remove friends
+friendRoute.get("/remove/:id", Auth, async (req, res) => {
   try {
+    const userId = req.user.id;
+    const friendID = req.params.id;
+
     const [user, friend] = await Promise.all([
       User.findById(userId).populate("friends"), // Pre-populate friends field
-      User.findById(friendId),
+      User.findById(friendID),
     ]);
 
     if (!user || !friend) {
@@ -195,7 +196,7 @@ friendRoute.delete("/:id", Auth, async (res, req) => {
     }
 
     const friendIndex = user.friends.findIndex(
-      (friendId) => friendId.toString() === friend._id.toString()
+      (friend) => friend._id.toString() === friendID.toString()
     );
     if (friendIndex === -1) {
       return res
@@ -212,15 +213,15 @@ friendRoute.delete("/:id", Auth, async (res, req) => {
       message: `${user.username} unfriended ${friend.username} successfully`,
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal Server Error" }); // Avoid exposing error details
+    console.error("Error fetching friends:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
 // Route to fetch user's friends
 friendRoute.get("/friends", Auth, async (req, res) => {
   try {
-    const userId = req.user.id; 
+    const userId = req.user.id;
 
     const user = await User.findById(userId).populate("friends");
 
@@ -228,7 +229,25 @@ friendRoute.get("/friends", Auth, async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    res.json(user.friends); 
+    res.json(user.friends);
+  } catch (error) {
+    console.error("Error fetching friends:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// Route to fetch user friend requests
+friendRoute.get("/requests", Auth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const user = await User.findById(userId).populate("friendRequests");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json(user.friendRequests);
   } catch (error) {
     console.error("Error fetching friends:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -273,7 +292,7 @@ friendRoute.get("/potential", Auth, async (req, res) => {
                 _id: 1,
                 username: 1,
                 bio: 1,
-                profilePicture: 1
+                profilePicture: 1,
                 // Add other desired public fields
               },
             },
@@ -337,6 +356,5 @@ friendRoute.get("/search", async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
-
 
 module.exports = friendRoute;
