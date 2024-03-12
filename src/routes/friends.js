@@ -181,7 +181,7 @@ friendRoute.get("/friends-of-friends/:userId", Auth, async (req, res) => {
 });
 
 // Remove friends
-friendRoute.get("/remove/:id", Auth, async (req, res) => {
+friendRoute.delete("/remove/:id", Auth, async (req, res) => {
   try {
     const userId = req.user.id;
     const friendID = req.params.id;
@@ -333,7 +333,7 @@ friendRoute.get("/potential", Auth, async (req, res) => {
 });
 
 // Route to search for users
-friendRoute.get("/search", async (req, res) => {
+friendRoute.get("/search", Auth,async (req, res) => {
   try {
     const searchTerm = req.query.term?.trim(); // Get the search term from query params and trim extra spaces
 
@@ -342,6 +342,7 @@ friendRoute.get("/search", async (req, res) => {
     }
     // Use the $or operator to search across multiple fields
     const users = await User.find({
+      _id: { $ne: req.user.id },
       $or: [
         { username: { $regex: searchTerm, $options: "i" } },
         { firstName: { $regex: searchTerm, $options: "i" } },
@@ -368,7 +369,10 @@ friendRoute.get("/profile/:id", Auth, async (req, res) => {
     }
 
     // Fetch both users in parallel using Promise.all for efficiency
-    const [user, friend] = await Promise.all([User.findById(userId), User.findById(friendId)]);
+    const [user, friend] = await Promise.all([
+      User.findById(userId),
+      User.findById(friendId),
+    ]);
 
     if (!user || !friend) {
       return res.status(404).json({ message: "User or friend not found" });
@@ -384,8 +388,5 @@ friendRoute.get("/profile/:id", Auth, async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 });
-
-
-
 
 module.exports = friendRoute;
