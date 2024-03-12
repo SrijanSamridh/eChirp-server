@@ -181,7 +181,7 @@ friendRoute.get("/friends-of-friends/:userId", Auth, async (req, res) => {
 });
 
 // Remove friends
-friendRoute.get("/remove/:id", Auth, async (req, res) => {
+friendRoute.delete("/remove/:id", Auth, async (req, res) => {
   try {
     const userId = req.user.id;
     const friendID = req.params.id;
