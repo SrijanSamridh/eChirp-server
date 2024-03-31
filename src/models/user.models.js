@@ -9,11 +9,11 @@ const userSchema = new mongoose.Schema(
     lastName: { type: String },
     bio: { type: String },
     profilePicture: { type: String },
-    friends: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-    friendRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    friends: [{ type: mongoose.Schema.Types.ObjectId, ref: "users" }],
+    friendRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: "users" }],
     numberOfFriends: { type: Number, default: 0 },
-    myCreatedEvents: [{ type: mongoose.Schema.Types.ObjectId, ref: "Event" }],
-    eventsAttended: [{ type: mongoose.Schema.Types.ObjectId, ref: "Event" }],
+    myCreatedEvents: [{ type: mongoose.Schema.Types.ObjectId, ref: "events" }],
+    eventsAttended: [{ type: mongoose.Schema.Types.ObjectId, ref: "events" }],
     numberOfEventsCreated: { type: Number, default: 0 },
     numberOfEventsAttended: { type: Number, default: 0 },
   },
@@ -49,6 +49,6 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
-const User = mongoose.model("User", userSchema);
+const User = mongoose.model("users", userSchema);
 
 module.exports = User;

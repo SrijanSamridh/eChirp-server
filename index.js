@@ -35,6 +35,8 @@ app.get("/", (req, res) => {
 app.use("/api/auth", require("./src/routes/auth.js"));
 app.use("/api/friend", require("./src/routes/friends.js"));
 app.use("/api/events", require("./src/routes/events.js"));
+app.use("/api/groups", require("./src/routes/groups.js"));
+app.use("/api/participants", require("./src/routes/participants.js"));
 
 const text = `
 ************************************************************

@@ -4,7 +4,7 @@ const eventSchema = new mongoose.Schema(
   {
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "users",
       required: true,
     },
     mainCategory: {
@@ -106,5 +106,5 @@ const eventSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const Event = mongoose.model("Event", eventSchema);
+const Event = mongoose.model("events", eventSchema);
 module.exports = Event;

@@ -7,9 +7,7 @@ const databaseName = process.env.MONGODB_NAME;
 const connectDatabase = () => {
   try {
     const con = moongoose.connect(databaseUrl, {
-      dbName: databaseName,
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
+      dbName: databaseName
     });
 
     const connection = moongoose.connection;
