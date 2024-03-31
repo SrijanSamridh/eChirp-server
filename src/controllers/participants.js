@@ -14,7 +14,7 @@ exports.addParticipant = async (req, res) => {
         await Participant.insertMany(participants.map((item) => {
             return {
                 userId: item._id,
-                groupId: data._id
+                groupId: data.groupId
             }
         }));
 
@@ -28,7 +28,7 @@ exports.removeParticipant = async (req, res) => {
     try {
         let { groupId, userId } = req.body;
 
-        if(!userId || (req.user.id == userId)) {
+        if(!userId || (req.user.id !== userId)) {
             let data = await Participant.findOne({ groupId, userId: req.user.id });
     
             if (!data || !data.isAdmin) {

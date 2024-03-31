@@ -69,13 +69,25 @@ exports.createGroup = async (req, res) => {
 exports.getGroups = async (req, res) => {
     try {
         let type = req.query.type;
-        let search = (type && (type === "owned")) ? {
-            userId: new mongoose.Types.ObjectId(req.user.id),
-            isAdmin: true,
-            isOwner: true
-        } : {
-            userId: new mongoose.Types.ObjectId(req.user.id)
-        };
+        let search;
+        if(type && (type === "owned")) {
+            search = {
+                userId: new mongoose.Types.ObjectId(req.user.id),
+                isAdmin: true,
+                isOwner: true
+            }
+        } else if(type && (type === "joined")) {
+            search = {
+                userId: new mongoose.Types.ObjectId(req.user.id),
+                isOwner: {
+                    $ne: true
+                }
+            }
+        } else {
+            search = {
+                userId: new mongoose.Types.ObjectId(req.user.id)
+            }
+        }
         let groups = await Participant.aggregate([
             {
                 $match: search
