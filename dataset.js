@@ -324,11 +324,11 @@ let eventsData = () => {
             },
             body: JSON.stringify({
                 ...event,
-                "coverImgUrl": "https://example.com/cover.jpg",
-                "Img1Url": "https://example.com/image1.jpg",
-                "Img2Url": "https://example.com/image2.jpg",
-                "Img3Url": "https://example.com/image3.jpg",
-                "Img4Url": "https://example.com/image4.jpg"
+                "coverImgUrl": "https://images.unsplash.com/photo-1504680177321-2e6a879aac86?q=80&w=1000&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTh8fGxpdmUlMjBldmVudHN8ZW58MHx8MHx8fDA%3D",
+                "Img1Url": "https://images.unsplash.com/photo-1504680177321-2e6a879aac86?q=80&w=1000&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTh8fGxpdmUlMjBldmVudHN8ZW58MHx8MHx8fDA%3D",
+                "Img2Url": "https://images.unsplash.com/photo-1504680177321-2e6a879aac86?q=80&w=1000&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTh8fGxpdmUlMjBldmVudHN8ZW58MHx8MHx8fDA%3D",
+                "Img3Url": "https://images.unsplash.com/photo-1504680177321-2e6a879aac86?q=80&w=1000&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTh8fGxpdmUlMjBldmVudHN8ZW58MHx8MHx8fDA%3D",
+                "Img4Url": "https://images.unsplash.com/photo-1504680177321-2e6a879aac86?q=80&w=1000&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTh8fGxpdmUlMjBldmVudHN8ZW58MHx8MHx8fDA%3D"
             })
         }).then((res) => res.json());
         if (eventData?.message === "Event created successfully") {
