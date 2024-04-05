@@ -12,6 +12,7 @@ exports.addParticipant = async (req, res) => {
         }
 
         await Participant.insertMany(participants.map((item) => {
+            if(item._id === req.user.id) return;
             return {
                 userId: item._id,
                 groupId: data.groupId

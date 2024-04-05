@@ -24,6 +24,7 @@ exports.createGroup = async (req, res) => {
         })).save();
 
         await Participant.insertMany([...participants.map((item) => {
+            if(item._id === req.user.id) return;
             return {
                 userId: item._id,
                 groupId: data._id

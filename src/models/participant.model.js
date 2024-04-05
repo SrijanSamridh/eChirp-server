@@ -24,8 +24,6 @@ const participantSchema = new mongoose.Schema({
     autoIndex: false
 });
 
-participantSchema.index({ userId: 1, groupId: 1 }, { unique: true });
-
 participantSchema.post("save", async function (data) {
     await Group.updateOne({ _id: data.groupId }, { $inc: { participants: 1 } });
 });
