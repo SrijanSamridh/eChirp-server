@@ -10,8 +10,6 @@ exports.createGroup = async (req, res) => {
         const owner = req.user.id;
         let user = await User.findOne({ _id: owner });
 
-        console.log(user);
-        
         if(!Object(Categories).hasOwnProperty(category) || (subCategory && !Categories[category].hasOwnProperty(subCategory)) || (subSubCategory && !Array(Categories[category][subCategory]).includes(subSubCategory))) {
             return res.status(400).json({ message: "Invalid category" });
         }
