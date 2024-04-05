@@ -19,6 +19,7 @@ exports.createMessage = async (req, res) => {
             replyTo: replyTo
         })).save();
 
+
         return res.status(201).json({
             message: {
                 messageId: data._id,
@@ -29,9 +30,8 @@ exports.createMessage = async (req, res) => {
                 createdAt: data.createdAt,
                 user: {
                     userId: req.user.id,
-                    firstname: check.userId.firstname,
-                    lastname: check.userId.lastname,
-                    providerId: check.userId.providerId
+                    username: check.userId.username,
+                    email: check.userId.email
                 }
             }
         });
@@ -127,9 +127,8 @@ exports.getMessages = async (req, res) => {
                     createdAt: 1,
                     user: {
                         userId: "$user._id",
-                        firstname: 1,
-                        lastname: 1,
-                        providerId: 1
+                        username: 1,
+                        email: 1
                     }
                 }
             }

@@ -265,7 +265,6 @@ friendRoute.get("/potential", Auth, async (req, res) => {
       return res.status(400).json({ message: "Invalid user ID" });
     }
 
-    // Pipeline to find potential friends
     const pipeline = [
       {
         $match: {
@@ -281,8 +280,8 @@ friendRoute.get("/potential", Auth, async (req, res) => {
               $match: {
                 $expr: {
                   $and: [
-                    { $ne: ["$_id", new mongoose.Types.ObjectId(userId)] }, // Exclude the user
-                    { $not: { $in: ["$_id", "$$friendsList"] } }, // Exclude existing friends
+                    { $ne: ["$_id", new mongoose.Types.ObjectId(userId)] },
+                    { $not: { $in: ["$_id", "$$friendsList"] } },
                   ],
                 },
               },
@@ -293,7 +292,6 @@ friendRoute.get("/potential", Auth, async (req, res) => {
                 username: 1,
                 bio: 1,
                 profilePicture: 1,
-                // Add other desired public fields
               },
             },
           ],
@@ -306,23 +304,22 @@ friendRoute.get("/potential", Auth, async (req, res) => {
       {
         $group: {
           _id: "$potentialFriends._id",
-          count: { $sum: 1 }, // Count occurrences (optional)
-          friend: { $first: "$potentialFriends" }, // Get friend details
+          count: { $sum: 1 },
+          friend: { $first: "$potentialFriends" },
         },
       },
       {
         $project: {
-          _id: 0, // Exclude _id field from the output
-          friend: 1, // Include friend field
-          count: 1, // Include count field
+          _id: 0,
+          friend: 1,
+          count: 1,
         },
       },
       {
-        $sort: { count: -1 }, // Optionally sort by mutual friends count
+        $sort: { count: -1 }
       },
     ];
 
-    // Execute the aggregation pipeline
     const potentialFriends = await User.aggregate(pipeline);
 
     res.json({ potentialFriends });
