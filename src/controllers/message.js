@@ -1,10 +1,11 @@
 const Participant = require('../models/participant.model.js');
 const Message = require('../models/message.model.js');
 const { default: mongoose } = require('mongoose');
+const { MessageType } = require('../../utils/message.utils.js');
 
 exports.createMessage = async (req, res) => {
     try {
-        const { groupId, message, type, replyTo } = req.body;
+        const { groupId, message, replyTo } = req.body;
         let check = await Participant.findOne({ userId: req.user.id, groupId: groupId }).populate("userId");
 
         if (!check) {
@@ -15,7 +16,7 @@ exports.createMessage = async (req, res) => {
             userId: req.user.id,
             groupId: groupId,
             message: message,
-            messageType: type,
+            messageType: MessageType.TEXT,
             replyTo: replyTo
         })).save();
 
