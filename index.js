@@ -44,7 +44,24 @@ app.use("/api/message", require("./src/routes/messae.js"));
 // Socket.io
 io.on("connection", (socket) => {
   socket.on("new-message", (data) => {
-    console.log("New Message", data);
+    let newData = {
+      messageId: data.messageId,
+      groupId: data.groupId,
+      message: data.message,
+      messageType: data.messageType,
+      replyTo: data.replyTo,
+      createdAt: data.createdAt,
+      user: {
+        userId: data.user.userId,
+        firstname: data.user.firstname,
+        lastname: data.user.lastname,
+        providerId: data.user.providerId
+      }
+    }
+    data.participants.forEach((item) => {
+      // if (item.userId === data.user.userId) return;
+      io.emit(`${item.userId}-new-message`, newData);
+    });
   });
   socket.on("new-group", (data) => {
     console.log("New Group", data);
