@@ -8,6 +8,8 @@ dotenv.config();
 connectDatabase();
 const app = express();
 const PORT = Number(process.env.PORT) || 8080;
+const server = require("http").createServer(app);
+const io = require("socket.io")(server);
 
 app
   .use(cors({
@@ -39,12 +41,22 @@ app.use("/api/groups", require("./src/routes/groups.js"));
 app.use("/api/participants", require("./src/routes/participants.js"));
 app.use("/api/message", require("./src/routes/messae.js"));
 
+// Socket.io
+io.on("connection", (socket) => {
+  socket.on("new-message", (data) => {
+    console.log("New Message", data);
+  });
+  socket.on("new-group", (data) => {
+    console.log("New Group", data);
+  });
+});
+
 const text = `
 ************************************************************
                   Listening on port: ${PORT}
                   http://localhost:${PORT}
 ************************************************************`;
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(text);
 });
