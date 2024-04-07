@@ -333,6 +333,8 @@ let eventsData = () => {
         }).then((res) => res.json());
         if (eventData?.message === "Event created successfully") {
             console.log(`Event ${index + 1} created successfully`);
+        } else {
+            console.error(`Error creating event ${index + 1}:`, eventData);
         }
     })
 }
