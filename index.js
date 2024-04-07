@@ -53,13 +53,12 @@ io.on("connection", (socket) => {
       createdAt: data.createdAt,
       user: {
         userId: data.user.userId,
-        firstname: data.user.firstname,
-        lastname: data.user.lastname,
-        providerId: data.user.providerId
+        username: data.user.username,
+        email: data.user.email
       }
     }
     data.participants.forEach((item) => {
-      // if (item.userId === data.user.userId) return;
+      if (item.userId === data.user.userId) return;
       io.emit(`${item.userId}-new-message`, newData);
     });
   });
