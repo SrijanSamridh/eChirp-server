@@ -10,7 +10,7 @@ exports.createGroup = async (req, res) => {
         const owner = req.user.id;
         let user = await User.findOne({ _id: owner });
 
-        if(!Object(Categories).hasOwnProperty(category) || (subCategory && !Categories[category].hasOwnProperty(subCategory)) || (subSubCategory && !Array(Categories[category][subCategory]).includes(subSubCategory))) {
+        if (!Object(Categories).hasOwnProperty(category) || (subCategory && !Categories[category].hasOwnProperty(subCategory)) || (subSubCategory && !Array(Categories[category][subCategory]).includes(subSubCategory))) {
             return res.status(400).json({ message: "Invalid category" });
         }
 
@@ -24,7 +24,7 @@ exports.createGroup = async (req, res) => {
         })).save();
 
         await Participant.insertMany([...participants.map((item) => {
-            if(item._id === req.user.id) return;
+            if (item._id === req.user.id) return;
             return {
                 userId: item._id,
                 groupId: data._id
@@ -44,9 +44,8 @@ exports.createGroup = async (req, res) => {
             updatedAt: data.updatedAt,
             owner: {
                 _id: user._id,
-                firstname: user.firstname,
-                lastname: user.lastname,
-                providerId: user.providerId,
+                username: user.username,
+                email: user.email,
                 owned: true
             },
             participants: [...participants.map((item) => {
@@ -69,13 +68,13 @@ exports.getGroups = async (req, res) => {
     try {
         let type = req.query.type;
         let search;
-        if(type && (type === "owned")) {
+        if (type && (type === "owned")) {
             search = {
                 userId: new mongoose.Types.ObjectId(req.user.id),
                 isAdmin: true,
                 isOwner: true
             }
-        } else if(type && (type === "joined")) {
+        } else if (type && (type === "joined")) {
             search = {
                 userId: new mongoose.Types.ObjectId(req.user.id),
                 isOwner: {
@@ -114,9 +113,8 @@ exports.getGroups = async (req, res) => {
                         {
                             $project: {
                                 "_id": 1,
-                                "firstname": 1,
-                                "lastname": 1,
-                                "providerId": 1,
+                                "username": 1,
+                                "email": 1,
                                 "owned": {
                                     $cond: {
                                         if: {
@@ -204,6 +202,93 @@ exports.updateGroup = async (req, res) => {
         await Group.updateOne({ _id: groupId }, { $set: { name, description } });
 
         res.status(200).json({ message: "Group updated successfully" });
+    } catch (err) {
+        res.status(500).json({ message: "Internal server error" });
+    }
+}
+
+exports.getUnknownGroups = async (req, res) => {
+    try {
+        let groups = await Group.aggregate([
+            {
+                $lookup: {
+                    from: "participants",
+                    localField: "_id",
+                    foreignField: "groupId",
+                    as: "participants"
+                }
+            },
+            {
+                $match: {
+                    "participants.userId": {
+                        $ne: new mongoose.Types.ObjectId(req.user.id)
+                    }
+                }
+            },
+            {
+                $lookup: {
+                    from: "messages",
+                    localField: "_id",
+                    foreignField: "groupId",
+                    pipeline: [
+                        {
+                            $sort: {
+                                createdAt: -1
+                            }
+                        },
+                        {
+                            $limit: 1
+                        }
+                    ],
+                    as: "lastMessage"
+                }
+            },
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "owner",
+                    foreignField: "_id",
+                    let: {
+                        "owner_id": "$group.owner",
+                    },
+                    pipeline: [
+                        {
+                            $project: {
+                                "_id": 1,
+                                "username": 1,
+                                "email": 1,
+                                "owned": {
+                                    $cond: {
+                                        if: {
+                                            $eq: [new mongoose.Types.ObjectId(req.user.id), "$$owner_id"]
+                                        },
+                                        then: true,
+                                        else: false
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    as: "owner"
+                }
+            },
+            {
+                $project: {
+                    "groupId": "$_id",
+                    "name": "$name",
+                    "description": "$description",
+                    "createdAt": "$createdAt",
+                    "category": "$category",
+                    "subCategory": "$subCategory",
+                    "subSubCategory": "$subSubCategory",
+                    "owner": "$owner",
+                    "participants": "$participants",
+                    "lastMessage": "$lastMessage"
+                }
+            }
+        ]);
+
+        res.status(200).json({ groups });
     } catch (err) {
         res.status(500).json({ message: "Internal server error" });
     }
