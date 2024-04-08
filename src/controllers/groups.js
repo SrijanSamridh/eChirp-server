@@ -235,24 +235,6 @@ exports.getUnknownGroups = async (req, res) => {
             },
             {
                 $lookup: {
-                    from: "messages",
-                    localField: "_id",
-                    foreignField: "groupId",
-                    pipeline: [
-                        {
-                            $sort: {
-                                createdAt: -1
-                            }
-                        },
-                        {
-                            $limit: 1
-                        }
-                    ],
-                    as: "lastMessage"
-                }
-            },
-            {
-                $lookup: {
                     from: "users",
                     localField: "owner",
                     foreignField: "_id",
@@ -290,8 +272,7 @@ exports.getUnknownGroups = async (req, res) => {
                     "subCategory": "$subCategory",
                     "subSubCategory": "$subSubCategory",
                     "owner": "$owner",
-                    "participants": "$participants",
-                    "lastMessage": "$lastMessage"
+                    "participants": "$participants"
                 }
             }
         ]);
