@@ -215,6 +215,14 @@ exports.getUnknownGroups = async (req, res) => {
                     from: "participants",
                     localField: "_id",
                     foreignField: "groupId",
+                    pipeline: [
+                        {
+                            $project: {
+                                "_id": 0,
+                                "userId": "$userId"
+                            }
+                        }
+                    ],
                     as: "participants"
                 }
             },
