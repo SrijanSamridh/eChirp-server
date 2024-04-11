@@ -3,6 +3,7 @@ const Event = require("../models/event.models");
 const User = require("../models/user.models");
 const Auth = require("../middlewares/auth");
 const { putObjectUrl, getObjectUrl } = require("../services/s3");
+const mongoose = require("mongoose");
 
 const eventRoute = express.Router();
 
@@ -86,13 +87,24 @@ eventRoute.post("/", Auth, async (req, res) => {
 eventRoute.get("/created", Auth, async (req, res) => {
   const userID = req.user.id;
   try {
-    const user = await User.findById(userID).populate("myCreatedEvents");
+    const user = await User.findById(userID).populate("myCreatedEvents").lean();
+
+    let events = user.myCreatedEvents.map((event) => {
+      return {
+        ...event,
+        createdBy: {
+          _id: user._id,
+          username: user.username,
+          email: user.email,
+        }
+      }
+    })
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    res.status(200).json({ events: user.myCreatedEvents });
+    res.status(200).json({ events });
   } catch (error) {
     console.error("Error fetching user's created events:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -147,11 +159,22 @@ eventRoute.get("/attended", Auth, async (req, res) => {
       match: { dateOfEvent: { $lt: currentDate } }, // Only include events whose dateOfEvent is less than the current date
     });
 
+    let events = user.myCreatedEvents.map((event) => {
+      return {
+        ...event,
+        createdBy: {
+          _id: user._id,
+          username: user.username,
+          email: user.email,
+        }
+      }
+    })
+
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    res.status(200).json({ events: user.eventsAttended });
+    res.status(200).json({ events });
   } catch (error) {
     console.error("Error fetching user's attended events:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -178,7 +201,10 @@ eventRoute.get("/upcoming", Auth, async (req, res) => {
     const upcomingEvents = await Event.find({
       _id: { $in: eventsAttended }, // Event ID is in the user's eventsAttended
       dateOfEvent: { $gte: currentDate }, // Event's date is after or equal to current date
-    }).sort({ dateOfEvent: 1 }); // Sort events by ascending order of dateOfEvent
+    }).sort({ dateOfEvent: 1 }).populate("createdBy", {
+      username: 1,
+      email: 1
+    }); // Sort events by ascending order of dateOfEvent
 
     res.status(200).json({ events: upcomingEvents });
   } catch (error) {

@@ -27,7 +27,7 @@ exports.sendNotification = async (req, res) => {
             userId: group.owner,
             message: user.username + " have requested to join " + group.name,
             type: NotificationType.INCOMING_GROUP_INVITE,
-            link: [
+            links: [
                 {
                     start: 0,
                     end: user.username.length,
@@ -37,7 +37,7 @@ exports.sendNotification = async (req, res) => {
                 },
                 {
                     start: 27,
-                    end: group.name.length,
+                    end: 27+group.name.length,
                     link: group.name,
                     type: NotificationLinkType.GROUP,
                     typeId: groupId
@@ -119,7 +119,7 @@ exports.replyToNotification = async (req, res) => {
         await (new Notification({
             userId,
             message: "Owner accepted the request for " + group.link,
-            type: NotificationType.DECLINED_GROUP_INVITE,
+            type: NotificationType.ACCEPTED_GROUP_INVITE
         })).save();
 
         return res.status(200).json({
