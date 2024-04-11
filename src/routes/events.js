@@ -10,20 +10,20 @@ const eventRoute = express.Router();
 eventRoute.get("/", Auth, async (req, res) => {
   const userID = req.user.id;
   try {
-    // Find the user by ID
     const user = await User.findById(userID);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Get the events attended by the user
     const eventsAttended = user.eventsAttended;
 
-    // Find all events where createdBy is not the user's ID and eventMode is not private
     const notJoinedEvents = await Event.find({
       createdBy: { $ne: userID }, // createdBy is not equal to user's ID
       eventMode: { $ne: "PRIVATE" }, // eventMode is not equal to private
       _id: { $nin: eventsAttended }, // Event ID is not in the user's eventsAttended
+    }).populate("createdBy", {
+      username: 1,
+      email: 1
     });
 
     res.status(200).json({ events: notJoinedEvents });

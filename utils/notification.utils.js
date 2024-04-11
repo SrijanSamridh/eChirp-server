@@ -1,10 +1,10 @@
-exports.NotificationType = [
-    "INCOMING_GROUP_INVITE",
-    "ACCEPTED_GROUP_INVITE",
-    "DECLINED_GROUP_INVITE"
-]
+exports.NotificationType = {
+    INCOMING_GROUP_INVITE: "INCOMING_GROUP_INVITE",
+    ACCEPTED_GROUP_INVITE: "ACCEPTED_GROUP_INVITE",
+    DECLINED_GROUP_INVITE: "DECLINED_GROUP_INVITE",
+}
 
-exports.NotificationLinkType = [
-    "GROUP",
-    "USER"
-]
+exports.NotificationLinkType = {
+    GROUP: "GROUP",
+    USER: "USER"
+}
