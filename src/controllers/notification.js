@@ -37,7 +37,7 @@ exports.sendNotification = async (req, res) => {
                 },
                 {
                     start: 27,
-                    end: 27+group.name.length,
+                    end: 27 + group.name.length,
                     link: group.name,
                     type: NotificationLinkType.GROUP,
                     typeId: groupId
@@ -85,7 +85,12 @@ exports.replyToNotification = async (req, res) => {
         }
 
         if (reply === "decline") {
-            let notification = await Notification.findByIdAndDelete({ _id: notificationId });
+            let notification = await Notification.findByIdAndDelete({ _id: notificationId, userId });
+            if(notification.type !== NotificationType.INCOMING_GROUP_INVITE) {
+                return res.status(400).json({
+                    message: "Invalid request"
+                });
+            }
             let groupName = notification.links.find(link => link.type === NotificationLinkType.GROUP).link;
             let userId = notification.links.find(link => link.type === NotificationLinkType.USER).typeId;
 
@@ -107,25 +112,40 @@ exports.replyToNotification = async (req, res) => {
         }
 
         let notification = await Notification.findOne({ _id: notificationId });
+        if(notification.type !== NotificationType.INCOMING_GROUP_INVITE) {
+            return res.status(400).json({
+                message: "Invalid request"
+            });
+        }
         let group = notification.links.find(link => link.type === NotificationLinkType.GROUP);
-        let user = notification.links.find(link => link.type === NotificationLinkType.USER).typeId;
+        let user = notification.links.find(link => link.type === NotificationLinkType.USER);
 
-        await Participant.insertOne({
-            userId: user,
+        await Participant.insertMany([{
+            userId: user.typeId,
             groupId: group.typeId,
             isAdmin: false
-        });
+        }]);
 
         await (new Notification({
-            userId,
+            userId: user.typeId,
             message: "Owner accepted the request for " + group.link,
             type: NotificationType.ACCEPTED_GROUP_INVITE
         })).save();
+
+        await Notification.updateOne({
+            _id: notificationId
+        }, {
+            $set: {
+                message: "You have accepted the request of " + user.link,
+                type: NotificationType.ACCEPTED_GROUP_INVITE
+            }
+        });
 
         return res.status(200).json({
             message: "Accepted"
         });
     } catch (err) {
+        console.log(err);
         return res.status(500).json({
             message: "Internal Server Error"
         });

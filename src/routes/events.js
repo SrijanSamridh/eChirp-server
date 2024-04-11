@@ -157,9 +157,9 @@ eventRoute.get("/attended", Auth, async (req, res) => {
     const user = await User.findById(userID).populate({
       path: "eventsAttended",
       match: { dateOfEvent: { $lt: currentDate } }, // Only include events whose dateOfEvent is less than the current date
-    });
+    }).lean();
 
-    let events = user.myCreatedEvents.map((event) => {
+    let events = user.eventsAttended.map((event) => {
       return {
         ...event,
         createdBy: {
