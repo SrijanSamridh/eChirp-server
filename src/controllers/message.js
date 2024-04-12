@@ -97,15 +97,15 @@ exports.getMessages = async (req, res) => {
             },
             {
                 $sort: {
-                    createdAt: -1
+                    createdAt: 1
                 }
             },
-            {
-                $skip: skip
-            },
-            {
-                $limit: limit
-            },
+            // {
+            //     $skip: skip
+            // },
+            // {
+            //     $limit: limit
+            // },
             {
                 $lookup: {
                     from: "users",
