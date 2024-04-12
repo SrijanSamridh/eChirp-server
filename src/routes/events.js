@@ -19,9 +19,9 @@ eventRoute.get("/", Auth, async (req, res) => {
     const eventsAttended = user.eventsAttended;
 
     const notJoinedEvents = await Event.find({
-      createdBy: { $ne: userID }, // createdBy is not equal to user's ID
-      eventMode: { $ne: "PRIVATE" }, // eventMode is not equal to private
-      _id: { $nin: eventsAttended }, // Event ID is not in the user's eventsAttended
+      createdBy: { $ne: userID },
+      eventMode: { $ne: "PRIVATE" },
+      _id: { $nin: eventsAttended },
     }).populate("createdBy", {
       username: 1,
       email: 1
