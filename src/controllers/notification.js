@@ -3,15 +3,49 @@ const Group = require('../models/group.model.js');
 const Notification = require('../models/notification.model.js');
 const User = require('../models/user.models.js');
 const Participant = require('../models/participant.model.js');
+const mongoose = require('mongoose');
 
 exports.sendNotification = async (req, res) => {
     try {
         let userId = req.user.id;
         let { groupId } = req.body;
 
-        let user = await User.findOne({
-            _id: userId
-        });
+        let user = await User.aggregate([
+            {
+                $match: {
+                    _id: userId
+                }
+            },
+            {
+                $lookup: {
+                    from: "participants",
+                    localField: "_id",
+                    foreignField: "userId",
+                    pipeline: [
+                        {
+                            $match: {
+                                groupId: new mongoose.Types.ObjectId(groupId)
+                            }
+                        }
+                    ],
+                    as: "participants"
+                }
+            }
+        ]);
+
+        if (!user || user.length === 0) {
+            return res.status(404).json({
+                message: "Invalid request"
+            });
+        }
+
+        user = user[0];
+
+        if (user.participants.length > 0) {
+            return res.status(400).json({
+                message: "You are already a member of this group"
+            });
+        }
 
         let group = await Group.findOne({
             _id: groupId

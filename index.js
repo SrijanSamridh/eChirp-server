@@ -39,7 +39,7 @@ app.use("/api/friend", require("./src/routes/friends.js"));
 app.use("/api/events", require("./src/routes/events.js"));
 app.use("/api/groups", require("./src/routes/groups.js"));
 app.use("/api/participants", require("./src/routes/participants.js"));
-app.use("/api/message", require("./src/routes/messae.js"));
+app.use("/api/message", require("./src/routes/message.js"));
 app.use("/api/notification", require("./src/routes/notification.js"));
 
 // Socket.io
