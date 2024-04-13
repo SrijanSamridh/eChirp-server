@@ -263,6 +263,9 @@ exports.getUnknownGroups = async (req, res) => {
                 }
             },
             {
+                $unwind: "$owner"
+            },
+            {
                 $project: {
                     "groupId": "$_id",
                     "name": "$name",
