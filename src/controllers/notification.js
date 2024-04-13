@@ -13,7 +13,7 @@ exports.sendNotification = async (req, res) => {
         let user = await User.aggregate([
             {
                 $match: {
-                    _id: userId
+                    _id: new mongoose.Types.ObjectId(userId)
                 }
             },
             {
