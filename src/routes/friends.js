@@ -11,16 +11,13 @@ friendRoute.post("/send", Auth, async (req, res) => {
   const { friendID } = req.body;
 
   try {
-    // Check if both users exist
     const friend = await User.findById(friendID);
     const user = await User.findById(userID);
 
     if (!friend || !user) {
-      // Combine the checks for friend and user existence
       return res.status(404).json({ error: "Friend or user not found!" });
     }
 
-    // Check if a friend request already exists
     if (
       friend.friendRequests.includes(user._id) ||
       user.friendRequests.includes(friend._id)

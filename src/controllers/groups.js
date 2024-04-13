@@ -272,7 +272,8 @@ exports.getUnknownGroups = async (req, res) => {
                     "subCategory": "$subCategory",
                     "subSubCategory": "$subSubCategory",
                     "owner": "$owner",
-                    "participants": "$participants"
+                    "participants": "$participants",
+                    "lastMessage": []
                 }
             }
         ]);
