@@ -3,30 +3,31 @@ const User = require('../models/user.models');
 const Auth = require("../middlewares/auth");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { getFirebaseUser } = require("../../config/firebase");
 const authRouter = express.Router();
 
 authRouter.post("/signup", async (req, res) => {
-  const { username, email, password } = req.body;
+  const { username, providerId, password, provider, verificationId, profilePicture } = req.body;
 
   try {
-    // Check if the user already exists
-    const existingUser = await User.findOne({ $or: [{ username }, { email }] });
-    if (existingUser) {
-      return res.status(400).json({ error: "User already exists" });
+    if(provider === "local"){
+      password = await bcrypt.hash(password, await bcrypt.genSalt(10));
+    } else {
+      switch(provider){
+        case "google":
+          let googleUser = await getFirebaseUser(verificationId);
+          console.log(googleUser);
+          break;
+      }
     }
 
-    // Hash the password before saving it to the database
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Create a new user
-    const newUser = new User({
+    const newUser = await (new User({
       username,
-      email,
-      password: hashedPassword,
-    });
-
-    // Save the user to the database
-    await newUser.save();
+      providerId,
+      password,
+      provider,
+      profilePicture
+    })).save();
 
     res.status(200).json({ message: "User registered successfully", body: newUser});
   } catch (error) {
@@ -71,7 +72,6 @@ authRouter.post("/signin", async (req, res) => {
     });
 
   } catch (err) {
-    console.log(err);
     res.status(500).json({
       message: `Internal server error : ${err.message}`,
     });
@@ -89,7 +89,6 @@ authRouter.get('/', Auth, async (req, res) =>{
 
       res.status(200).json(user);
   } catch (error) {
-      console.error("Error fetching user data:", error);
       res.status(500).json({message: "Internal Server Error"});
   }
 });
@@ -97,7 +96,7 @@ authRouter.get('/', Auth, async (req, res) =>{
 // update user Details ---> PUT Method 
 authRouter.put("/", Auth, async (req, res) => {
   const userId = req.user.id;
-  const { username, email, firstName, lastName, bio } = req.body;
+  const { username, providerId, firstName, lastName, bio } = req.body;
 
   try {
     // Fetch the user from the database
@@ -110,8 +109,8 @@ authRouter.put("/", Auth, async (req, res) => {
     if (username !== undefined) {
       user.username = username;
     }
-    if (email !== undefined) {
-      user.email = email;
+    if (providerId !== undefined) {
+      user.providerId = providerId;
     }
     if (firstName !== undefined) {
       user.firstName = firstName;
@@ -128,7 +127,6 @@ authRouter.put("/", Auth, async (req, res) => {
 
     res.status(200).json({ message: "User details updated successfully", user });
   } catch (error) {
-    console.error("Error updating user details:", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 });

@@ -72,7 +72,6 @@ exports.getParticipants = async (req, res) => {
                     _id: 0,
                     userId: "$user._id",
                     username: "$user.username",
-                    email: "$user.email",
                     providerId: "$user.providerId",
                     isAdmin: 1,
                     isOwner: 1

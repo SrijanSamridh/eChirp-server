@@ -24,7 +24,7 @@ eventRoute.get("/", Auth, async (req, res) => {
       _id: { $nin: eventsAttended },
     }).populate("createdBy", {
       username: 1,
-      email: 1
+      providerId: 1
     });
 
     res.status(200).json({ events: notJoinedEvents });
@@ -95,7 +95,7 @@ eventRoute.get("/created", Auth, async (req, res) => {
         createdBy: {
           _id: user._id,
           username: user.username,
-          email: user.email,
+          providerId: user.providerId,
         }
       }
     })
@@ -165,7 +165,7 @@ eventRoute.get("/attended", Auth, async (req, res) => {
         createdBy: {
           _id: user._id,
           username: user.username,
-          email: user.email,
+          providerId: user.providerId,
         }
       }
     })
@@ -203,7 +203,7 @@ eventRoute.get("/upcoming", Auth, async (req, res) => {
       dateOfEvent: { $gte: currentDate }, // Event's date is after or equal to current date
     }).sort({ dateOfEvent: 1 }).populate("createdBy", {
       username: 1,
-      email: 1
+      providerId: 1
     }); // Sort events by ascending order of dateOfEvent
 
     res.status(200).json({ events: upcomingEvents });

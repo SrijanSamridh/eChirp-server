@@ -45,7 +45,7 @@ exports.createGroup = async (req, res) => {
             owner: {
                 _id: user._id,
                 username: user.username,
-                email: user.email,
+                providerId: user.providerId,
                 owned: true
             },
             participants: [...participants.map((item) => {
@@ -114,7 +114,7 @@ exports.getGroups = async (req, res) => {
                             $project: {
                                 "_id": 1,
                                 "username": 1,
-                                "email": 1,
+                                "providerId": 1,
                                 "owned": {
                                     $cond: {
                                         if: {
@@ -246,7 +246,7 @@ exports.getUnknownGroups = async (req, res) => {
                             $project: {
                                 "_id": 1,
                                 "username": 1,
-                                "email": 1,
+                                "providerId": 1,
                                 "owned": {
                                     $cond: {
                                         if: {

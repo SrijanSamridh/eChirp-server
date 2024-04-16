@@ -32,7 +32,7 @@ exports.createMessage = async (req, res) => {
                 user: {
                     userId: req.user.id,
                     username: check.userId.username,
-                    email: check.userId.email
+                    providerId: check.userId.providerId
                 }
             }
         });
@@ -129,7 +129,7 @@ exports.getMessages = async (req, res) => {
                     user: {
                         userId: "$user._id",
                         username: 1,
-                        email: 1
+                        providerId: 1
                     }
                 }
             }

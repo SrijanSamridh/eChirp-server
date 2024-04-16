@@ -2,8 +2,8 @@ const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema(
   {
-    username: { type: String, required: true, unique: true },
-    email: { type: String, required: true, unique: true },
+    username: { type: String, required: true },
+    providerId: { type: String, required: true },
     password: { type: String, required: true },
     firstName: { type: String },
     lastName: { type: String },
@@ -16,9 +16,17 @@ const userSchema = new mongoose.Schema(
     eventsAttended: [{ type: mongoose.Schema.Types.ObjectId, ref: "events" }],
     numberOfEventsCreated: { type: Number, default: 0 },
     numberOfEventsAttended: { type: Number, default: 0 },
+    provider: {
+      type: String,
+      default: "local"
+    }
   },
   { timestamps: true }
 );
+
+userSchema.index({username: 1, providerId: 1}, {
+  unique: true
+});
 
 userSchema.pre("save", async function (next) {
   // Increment counters based on certain conditions

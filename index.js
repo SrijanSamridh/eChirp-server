@@ -55,7 +55,7 @@ io.on("connection", (socket) => {
       user: {
         userId: data.user.userId,
         username: data.user.username,
-        email: data.user.email
+        providerId: data.user.providerId
       }
     }
     data.participants.forEach((item) => {
