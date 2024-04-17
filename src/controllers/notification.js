@@ -4,6 +4,7 @@ const Notification = require('../models/notification.model.js');
 const User = require('../models/user.models.js');
 const Participant = require('../models/participant.model.js');
 const mongoose = require('mongoose');
+const { link } = require('../routes/notification.js');
 
 exports.sendNotification = async (req, res) => {
     try {
@@ -57,7 +58,7 @@ exports.sendNotification = async (req, res) => {
             });
         }
 
-        await (new Notification({
+        let data = await (new Notification({
             userId: group.owner,
             message: user.username + " have requested to join " + group.name,
             type: NotificationType.INCOMING_GROUP_INVITE,
@@ -80,7 +81,16 @@ exports.sendNotification = async (req, res) => {
         })).save();
 
         return res.status(200).json({
-            message: "Notification sent"
+            message: "Notification sent",
+            notification: {
+                notificationId: data._id,
+                userId: data.userId,
+                message: data.message,
+                type: data.type,
+                links: data.links,
+                createdAt: data.createdAt,
+                updatedAt: data.updatedAt
+            }
         });
     } catch (err) {
         return res.status(500).json({
@@ -93,9 +103,24 @@ exports.getNotifications = async (req, res) => {
     try {
         let userId = req.user.id;
 
-        let notifications = await Notification.find({
-            userId
-        });
+        let notifications = await Notification.aggregate([
+            {
+                $match: {
+                    userId: new mongoose.Types.ObjectId(userId)
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    notificationId: "$_id",
+                    userId: 1,
+                    message: 1,
+                    type: 1,
+                    links: 1,
+                    createdAt: 1
+                }
+            }
+        ]);
 
         return res.status(200).json({
             notifications
@@ -126,10 +151,10 @@ exports.replyToNotification = async (req, res) => {
                 });
             }
             let groupName = notification.links.find(link => link.type === NotificationLinkType.GROUP).link;
-            let userId = notification.links.find(link => link.type === NotificationLinkType.USER).typeId;
+            let user = notification.links.find(link => link.type === NotificationLinkType.USER);
 
             await (new Notification({
-                userId,
+                userId: user.typeId,
                 message: "Owner declined the request for " + groupName,
                 type: NotificationType.DECLINED_GROUP_INVITE,
             })).save();
@@ -160,9 +185,18 @@ exports.replyToNotification = async (req, res) => {
             isAdmin: false
         }]);
 
-        await (new Notification({
+        let data = await (new Notification({
             userId: user.typeId,
             message: "Owner accepted the request for " + group.link,
+            links: [
+                {
+                    start: 24,
+                    end: 24 + group.link.length,
+                    link: group.link,
+                    type: NotificationLinkType.GROUP,
+                    typeId: group.typeId
+                }
+            ],
             type: NotificationType.ACCEPTED_GROUP_INVITE
         })).save();
 
@@ -176,10 +210,18 @@ exports.replyToNotification = async (req, res) => {
         });
 
         return res.status(200).json({
-            message: "Accepted"
+            message: "Accepted",
+            notification: {
+                notificationId: data._id,
+                userId: data.userId,
+                message: data.message,
+                links: data.links,
+                type: data.type,
+                createdAt: data.createdAt,
+                updatedAt: data.updatedAt
+            }
         });
     } catch (err) {
-        console.log(err);
         return res.status(500).json({
             message: "Internal Server Error"
         });
