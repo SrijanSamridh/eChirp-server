@@ -88,8 +88,7 @@ exports.sendNotification = async (req, res) => {
                 message: data.message,
                 type: data.type,
                 links: data.links,
-                createdAt: data.createdAt,
-                updatedAt: data.updatedAt
+                createdAt: data.createdAt
             }
         });
     } catch (err) {
@@ -153,14 +152,22 @@ exports.replyToNotification = async (req, res) => {
             let groupName = notification.links.find(link => link.type === NotificationLinkType.GROUP).link;
             let user = notification.links.find(link => link.type === NotificationLinkType.USER);
 
-            await (new Notification({
+            let data = await (new Notification({
                 userId: user.typeId,
                 message: "Owner declined the request for " + groupName,
                 type: NotificationType.DECLINED_GROUP_INVITE,
             })).save();
 
             return res.status(200).json({
-                message: "Declined"
+                message: "Declined",
+                notification: {
+                    notificationId: data._id,
+                    userId: data.userId,
+                    message: data.message,
+                    links: data.links,
+                    type: data.type,
+                    createdAt: data.createdAt
+                }
             });
         }
 
