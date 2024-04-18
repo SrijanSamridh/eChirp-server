@@ -1,20 +1,20 @@
 const users = [
-    { username: "john_doe", email: "john.doe@example.com", password: "password1" },
-    { username: "jane_smith", email: "jane.smith@example.com", password: "password2" },
-    { username: "michael_jackson", email: "michael.jackson@example.com", password: "password3" },
-    { username: "emily_watson", email: "emily.watson@example.com", password: "password4" },
-    { username: "david_copperfield", email: "david.copperfield@example.com", password: "password5" },
-    { username: "susan_brown", email: "susan.brown@example.com", password: "password6" },
-    { username: "robert_green", email: "robert.green@example.com", password: "password7" },
-    { username: "lisa_white", email: "lisa.white@example.com", password: "password8" },
-    { username: "william_black", email: "william.black@example.com", password: "password9" },
-    { username: "elizabeth_taylor", email: "elizabeth.taylor@example.com", password: "password10" },
-    { username: "samuel_johnson", email: "samuel.johnson@example.com", password: "password11" },
-    { username: "sophia_anderson", email: "sophia.anderson@example.com", password: "password12" },
-    { username: "nathan_miller", email: "nathan.miller@example.com", password: "password13" },
-    { username: "olivia_clark", email: "olivia.clark@example.com", password: "password14" },
-    { username: "ethan_harris", email: "ethan.harris@example.com", password: "password15" },
-    { username: "alison_wood", email: "alison.wood@gmail.com", password: "helloworld" }
+    { username: "john_doe", providerId: "john.doe@example.com", password: "password1" },
+    { username: "jane_smith", providerId: "jane.smith@example.com", password: "password2" },
+    { username: "michael_jackson", providerId: "michael.jackson@example.com", password: "password3" },
+    { username: "emily_watson", providerId: "emily.watson@example.com", password: "password4" },
+    { username: "david_copperfield", providerId: "david.copperfield@example.com", password: "password5" },
+    { username: "susan_brown", providerId: "susan.brown@example.com", password: "password6" },
+    { username: "robert_green", providerId: "robert.green@example.com", password: "password7" },
+    { username: "lisa_white", providerId: "lisa.white@example.com", password: "password8" },
+    { username: "william_black", providerId: "william.black@example.com", password: "password9" },
+    { username: "elizabeth_taylor", providerId: "elizabeth.taylor@example.com", password: "password10" },
+    { username: "samuel_johnson", providerId: "samuel.johnson@example.com", password: "password11" },
+    { username: "sophia_anderson", providerId: "sophia.anderson@example.com", password: "password12" },
+    { username: "nathan_miller", providerId: "nathan.miller@example.com", password: "password13" },
+    { username: "olivia_clark", providerId: "olivia.clark@example.com", password: "password14" },
+    { username: "ethan_harris", providerId: "ethan.harris@example.com", password: "password15" },
+    { username: "alison_wood", providerId: "alison.wood@gmail.com", password: "helloworld" }
 ];
 
 const events = [

@@ -7,10 +7,10 @@ const { getFirebaseUser } = require("../../config/firebase");
 const authRouter = express.Router();
 
 authRouter.post("/signup", async (req, res) => {
-  const { username, providerId, password, provider, verificationId, profilePicture } = req.body;
+  let { username, providerId, password, provider, verificationId, profilePicture } = req.body;
 
   try {
-    if(provider === "local"){
+    if(provider === "local" || !provider){
       password = await bcrypt.hash(password, await bcrypt.genSalt(10));
     } else {
       switch(provider){
@@ -31,7 +31,6 @@ authRouter.post("/signup", async (req, res) => {
 
     res.status(200).json({ message: "User registered successfully", body: newUser});
   } catch (error) {
-    console.error(error);
     res.status(500).json({ error: `Internal Server Error: ${error}` });
   }
 });
