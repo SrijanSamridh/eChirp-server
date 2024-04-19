@@ -7,7 +7,7 @@ const { getFirebaseUser } = require("../../config/firebase");
 const authRouter = express.Router();
 
 authRouter.post("/signup", async (req, res) => {
-  let { username, providerId, password, provider, verificationId, profilePicture } = req.body;
+  let { username, providerId, password, provider, verificationId, profilePicture, firstName, lastName } = req.body;
 
   try {
     if(provider === "local" || !provider){
@@ -15,13 +15,21 @@ authRouter.post("/signup", async (req, res) => {
     } else {
       switch(provider){
         case "google":
+          console.log("Google provider");
           let googleUser = await getFirebaseUser(verificationId);
-          console.log(googleUser);
+          let { email, photoURL, displayName } = googleUser.providerData[0];
+          providerId = email;
+          profilePicture = photoURL;
+          firstName = displayName.split(" ")[0];
+          lastName = displayName.split(" ")[1];
+          username = email.split("@")[0];
           break;
       }
     }
 
     const newUser = await (new User({
+      firstName,
+      lastName,
       username,
       providerId,
       password,
@@ -29,7 +37,13 @@ authRouter.post("/signup", async (req, res) => {
       profilePicture
     })).save();
 
-    res.status(200).json({ message: "User registered successfully", body: newUser});
+    const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET);
+    res.header("x-auth-token", token);
+
+    res.status(200).json({ message: "User registered successfully", body: {
+      ...newUser._doc,
+      token
+    }});
   } catch (error) {
     res.status(500).json({ error: `Internal Server Error: ${error}` });
   }
