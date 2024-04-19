@@ -15,7 +15,6 @@ authRouter.post("/signup", async (req, res) => {
     } else {
       switch(provider){
         case "google":
-          console.log("Google provider");
           let googleUser = await getFirebaseUser(verificationId);
           let { email, photoURL, displayName } = googleUser.providerData[0];
           providerId = email;
@@ -25,6 +24,7 @@ authRouter.post("/signup", async (req, res) => {
           username = email.split("@")[0];
           break;
       }
+      password = null;
     }
 
     const newUser = await (new User({
@@ -36,6 +36,8 @@ authRouter.post("/signup", async (req, res) => {
       provider,
       profilePicture
     })).save();
+
+    console.log(newUser);
 
     const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET);
     res.header("x-auth-token", token);
