@@ -37,8 +37,6 @@ authRouter.post("/signup", async (req, res) => {
       profilePicture
     })).save();
 
-    console.log(newUser);
-
     const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET);
     res.header("x-auth-token", token);
 
