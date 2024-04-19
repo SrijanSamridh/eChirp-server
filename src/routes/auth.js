@@ -52,13 +52,24 @@ authRouter.post("/signup", async (req, res) => {
 /// SignIn route
 authRouter.post("/signin", async (req, res) => {
   try {
-    const { username, password } = req.body;
-    if (!username || !password) {
-      return res.status(400).json({
-        message: "All fields are required",
-      });
+    let { username, password, verificationId, provider } = req.body;
+
+    if(provider && provider !== "local"){
+      if(!verificationId) return res.status(400).json({message: "Verification Id is required"});
+      switch(provider){
+        case "google":
+          let googleUser = await getFirebaseUser(verificationId);
+          username = googleUser.providerData[0].email.split("@")[0];
+          break;
+      }
+    } else {
+      if (!username || !password) {
+        return res.status(400).json({
+          message: "All fields are required",
+        });
+      }
     }
-    // check if User exists
+
     const checkuser = await User.findOne({ username });
     if (!checkuser) {
       return res.status(400).json({
@@ -67,11 +78,13 @@ authRouter.post("/signin", async (req, res) => {
     }
 
     // compare password
-    const isMatch = await bcrypt.compare(password, checkuser.password);
-    if (!isMatch) {
-      return res.status(400).json({
-        message: "Invalid Credentials Password does not match",
-      });
+    if(provider === "local" || !provider){
+      const isMatch = await bcrypt.compare(password, checkuser.password);
+      if (!isMatch) {
+        return res.status(400).json({
+          message: "Invalid Credentials Password does not match",
+        });
+      }
     }
 
     // generate token
