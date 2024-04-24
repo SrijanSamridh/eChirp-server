@@ -4,7 +4,6 @@ const Notification = require('../models/notification.model.js');
 const User = require('../models/user.models.js');
 const Participant = require('../models/participant.model.js');
 const mongoose = require('mongoose');
-const io = require('../../config/socket.js');
 
 exports.sendNotification = async (req, res) => {
     try {
