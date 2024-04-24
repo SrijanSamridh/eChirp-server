@@ -89,8 +89,6 @@ exports.sendNotification = async (req, res) => {
             createdAt: data.createdAt
         }
 
-        io.emit(`${group.owner}-new-notification`, dataToSend);
-
         return res.status(200).json({
             message: "Notification sent",
             notification: dataToSend

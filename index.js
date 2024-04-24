@@ -9,7 +9,7 @@ connectDatabase();
 const app = express();
 const PORT = Number(process.env.PORT) || 8080;
 const server = require("http").createServer(app);
-const io = require("./config/socket.js").attach(server);
+const io = require("socket.io")(server);
 
 app
   .use(cors({
@@ -62,6 +62,9 @@ io.on("connection", (socket) => {
       if (item.userId === data.user.userId) return;
       io.emit(`${item.userId}-new-message`, newData);
     });
+  });
+  socket.on("new-notification", (data) => {
+    io.emit(`${data.userId}-new-notification`, data);
   });
   socket.on("new-group", (data) => {
     console.log("New Group", data);
