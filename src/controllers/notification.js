@@ -4,6 +4,7 @@ const Notification = require('../models/notification.model.js');
 const User = require('../models/user.models.js');
 const Participant = require('../models/participant.model.js');
 const mongoose = require('mongoose');
+const io = require('../../config/socket.js');
 
 exports.sendNotification = async (req, res) => {
     try {
@@ -79,16 +80,20 @@ exports.sendNotification = async (req, res) => {
             ]
         })).save();
 
+        let dataToSend = {
+            notificationId: data._id,
+            userId: data.userId,
+            message: data.message,
+            type: data.type,
+            links: data.links,
+            createdAt: data.createdAt
+        }
+
+        io.emit(`${group.owner}-new-notification`, dataToSend);
+
         return res.status(200).json({
             message: "Notification sent",
-            notification: {
-                notificationId: data._id,
-                userId: data.userId,
-                message: data.message,
-                type: data.type,
-                links: data.links,
-                createdAt: data.createdAt
-            }
+            notification: dataToSend
         });
     } catch (err) {
         return res.status(500).json({

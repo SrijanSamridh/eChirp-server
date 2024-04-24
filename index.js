@@ -9,7 +9,7 @@ connectDatabase();
 const app = express();
 const PORT = Number(process.env.PORT) || 8080;
 const server = require("http").createServer(app);
-const io = require("socket.io")(server);
+const io = require("./config/socket.js").attach(server);
 
 app
   .use(cors({
